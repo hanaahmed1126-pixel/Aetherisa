@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background-color: #121212;
       color: #ffffff;
       display: flex;
@@ -37,9 +37,7 @@
       margin-bottom: 1rem;
       font-size: 1rem;
     }
-    input:focus {
-      outline: 2px solid #007bff;
-    }
+    input:focus { outline: 2px solid #007bff; }
     button {
       width: 100%;
       padding: 12px 24px;
@@ -50,17 +48,10 @@
       cursor: pointer;
       font-size: 1rem;
       font-weight: bold;
-      transition: background-color 0.2s ease;
     }
-    button:hover { background-color: #0056b3; }
     button:disabled { background-color: #555; cursor: not-allowed; }
     #imageContainer { margin-top: 1.5rem; min-height: 200px; display: flex; align-items: center; justify-content: center; }
-    img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      display: none;
-    }
+    img { max-width: 100%; height: auto; border-radius: 8px; display: none; }
     .loading { display: none; color: #aaa; margin-top: 1rem; }
   </style>
 </head>
@@ -80,9 +71,7 @@
 
   <script>
     function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        generateAIImage();
-      }
+      if (event.key === 'Enter') generateAIImage();
     }
 
     function generateAIImage() {
@@ -97,34 +86,31 @@
         return;
       }
 
-      // Hide old image, disable button, & show loading state
+      // UI state updates
       imgTag.style.display = 'none';
-      loadingText.innerText = "Creating image, please wait...";
+      loadingText.innerText = "Creating image (takes ~5-10s)...";
       loadingText.style.display = 'block';
       btn.disabled = true;
 
-      // Encode prompt for safety & append random seed to prevent caching
       const encodedPrompt = encodeURIComponent(prompt);
-      const randomSeed = Math.floor(Math.random() * 99999);
-      
-      // Updated Pollinations Endpoint URL
-      const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?width=512&height=512&seed=${randomSeed}&model=flux`;
+      const randomSeed = Math.floor(Math.random() * 999999);
 
-      // Preload image in background before showing
-      const tempImage = new Image();
-      tempImage.src = imageUrl;
-      
-      tempImage.onload = () => {
-        imgTag.src = imageUrl;
+      // Direct image proxy endpoint with seed & parameters
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${randomSeed}&nologo=true`;
+
+      // Set image source directly (browser handles image stream)
+      imgTag.onload = () => {
         loadingText.style.display = 'none';
         imgTag.style.display = 'block';
         btn.disabled = false;
       };
 
-      tempImage.onerror = () => {
-        loadingText.innerText = "Failed to load image. Please try again.";
+      imgTag.onerror = () => {
+        loadingText.innerText = "Failed to load image. Check connection and try again.";
         btn.disabled = false;
       };
+
+      imgTag.src = imageUrl;
     }
   </script>
 </body>
