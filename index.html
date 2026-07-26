@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aetherisa - AI Media Studio</title>
+  <title>Aetherisa - AI Creation Studio</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -35,30 +35,6 @@
       letter-spacing: 0.5px;
     }
     
-    .tabs {
-      display: flex;
-      background-color: #0f172a;
-      border-radius: 8px;
-      padding: 4px;
-      margin-bottom: 1.5rem;
-      border: 1px solid #334155;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      background: transparent;
-      color: #94a3b8;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .tab-btn.active {
-      background-color: #38bdf8;
-      color: #0f172a;
-    }
-
     label { font-size: 0.875rem; font-weight: 600; color: #94a3b8; display: block; margin-top: 1rem; margin-bottom: 0.25rem; }
     
     input[type="text"], select {
@@ -90,14 +66,6 @@
     button.action-btn:hover { background-color: #0369a1; }
     button.action-btn:disabled { background-color: #475569; cursor: not-allowed; }
 
-    /* Regenerate photo button */
-    #regenPhotoBtn {
-      background-color: #8b5cf6;
-      display: none;
-      margin-top: 0.75rem;
-    }
-    #regenPhotoBtn:hover { background-color: #7c3aed; }
-
     #downloadBtn {
       background-color: #10b981;
       display: none;
@@ -124,21 +92,16 @@
 
   <div class="card">
     <h2>Aetherisa</h2>
-
-    <div class="tabs">
-      <button class="tab-btn active" id="imageModeBtn" onclick="switchMode('image')">🎨 Image Generator</button>
-      <button class="tab-btn" id="videoModeBtn" onclick="switchMode('video')">🎬 Video Generator</button>
-    </div>
     
     <label for="promptInput">Prompt Description</label>
     <input type="text" id="promptInput" placeholder="Describe what you want to create..." onkeypress="handleKeyPress(event)">
 
-    <div class="grid" id="imageOptions">
+    <div class="grid">
       <div>
-        <label for="modelSelect">Model</label>
-        <select id="modelSelect">
-          <option value="flux">Flux (High Detail)</option>
-          <option value="turbo">Turbo (Fast Speed)</option>
+        <label for="typeSelect">Output Format</label>
+        <select id="typeSelect" onchange="toggleTypeOptions()">
+          <option value="image">Image / Photo</option>
+          <option value="video">Video Animation</option>
         </select>
       </div>
       <div>
@@ -151,45 +114,33 @@
       </div>
     </div>
 
-    <button class="action-btn" id="genBtn" onclick="generateMedia()">Generate</button>
+    <button class="action-btn" id="genBtn" onclick="generateMedia()">Generate Media</button>
 
     <div id="mediaContainer">
-      <p id="loadingText" class="loading">Processing... Please wait.</p>
-      <img id="resultImage" src="" alt="AI Image Output">
-      <video id="resultVideo" controls autoplay loop muted playsinline></video>
+      <p id="loadingText" class="loading">Aetherisa is working on your creation...</p>
+      <img id="resultImage" src="" alt="AI Output Image">
+      <video id="resultVideo" controls autoplay loop playsinline></video>
     </div>
 
-    <!-- Regenerate button appears ONLY for photo mode -->
-    <button class="action-btn" id="regenPhotoBtn" onclick="generateMedia()">🔄 Generate Again</button>
-    <button class="action-btn" id="downloadBtn" onclick="downloadMedia()">Download File</button>
+    <button class="action-btn" id="downloadBtn" onclick="downloadMedia()">Download Output</button>
   </div>
 
   <script>
-    let currentMode = 'image';
-
-    function switchMode(mode) {
-      currentMode = mode;
-      document.getElementById('imageModeBtn').classList.toggle('active', mode === 'image');
-      document.getElementById('videoModeBtn').classList.toggle('active', mode === 'video');
-      document.getElementById('imageOptions').style.display = mode === 'image' ? 'grid' : 'none';
-
-      document.getElementById('resultImage').style.display = 'none';
-      document.getElementById('resultVideo').style.display = 'none';
-      document.getElementById('regenPhotoBtn').style.display = 'none';
-      document.getElementById('downloadBtn').style.display = 'none';
-    }
-
     function handleKeyPress(event) {
       if (event.key === 'Enter') generateMedia();
     }
 
+    function toggleTypeOptions() {
+      // Custom tweaks if you want to switch settings per media type later
+    }
+
     async function generateMedia() {
       const prompt = document.getElementById('promptInput').value.trim();
+      const type = document.getElementById('typeSelect').value;
       const imgTag = document.getElementById('resultImage');
-      const videoTag = document.getElementById('resultVideo');
+      const vidTag = document.getElementById('resultVideo');
       const loadingText = document.getElementById('loadingText');
       const genBtn = document.getElementById('genBtn');
-      const regenPhotoBtn = document.getElementById('regenPhotoBtn');
       const downloadBtn = document.getElementById('downloadBtn');
 
       if (!prompt) {
@@ -197,78 +148,78 @@
         return;
       }
 
+      // Hide current display items
       imgTag.style.display = 'none';
-      videoTag.style.display = 'none';
-      regenPhotoBtn.style.display = 'none';
+      vidTag.style.display = 'none';
       downloadBtn.style.display = 'none';
       loadingText.style.display = 'block';
       genBtn.disabled = true;
 
+      const [width, height] = document.getElementById('sizeSelect').value.split('x');
       const encodedPrompt = encodeURIComponent(prompt);
       const randomSeed = Math.floor(Math.random() * 999999);
 
-      if (currentMode === 'image') {
-        const model = document.getElementById('modelSelect').value;
-        const [width, height] = document.getElementById('sizeSelect').value.split('x');
-        loadingText.innerText = "Aetherisa is generating your photo... (5-10s)";
-
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${randomSeed}&model=${model}&nologo=true`;
+      if (type === 'image') {
+        loadingText.innerText = "Aetherisa is generating your photo...";
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${randomSeed}&model=flux&nologo=true`;
 
         imgTag.onload = () => {
           loadingText.style.display = 'none';
           imgTag.style.display = 'block';
-          regenPhotoBtn.style.display = 'block'; // Photo-only feature
           downloadBtn.style.display = 'block';
           genBtn.disabled = false;
         };
         imgTag.onerror = () => {
-          loadingText.innerText = "Failed to load image. Try again.";
+          loadingText.innerText = "Failed to load image. Please try again.";
           genBtn.disabled = false;
         };
         imgTag.src = imageUrl;
 
       } else {
-        loadingText.innerText = "Aetherisa is rendering video frames... (takes ~15-30s)";
-
-        const videoUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${randomSeed}&model=video&nologo=true`;
+        // Video Generation Mode
+        loadingText.innerText = "Aetherisa is rendering video frames... (This may take 15-30s)";
+        const videoUrl = `https://gen.pollinations.ai/video/${encodedPrompt}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true`;
 
         try {
+          // Fetch video as blob to prevent 0-sec stream errors
           const response = await fetch(videoUrl);
-          if (!response.ok) throw new Error("Video stream failed");
+          if (!response.ok) throw new Error("Server error");
+          
+          const blob = await response.blob();
+          const localVideoUrl = URL.createObjectURL(blob);
 
-          const videoBlob = await response.blob();
-          const objectUrl = URL.createObjectURL(videoBlob);
-
-          videoTag.src = objectUrl;
+          vidTag.src = localVideoUrl;
           loadingText.style.display = 'none';
-          videoTag.style.display = 'block';
-          downloadBtn.style.display = 'block'; // Only download shows for video
-        } catch (error) {
-          loadingText.innerText = "Video server is busy. Try clicking Generate again!";
-        } finally {
+          vidTag.style.display = 'block';
+          downloadBtn.style.display = 'block';
+          genBtn.disabled = false;
+        } catch (err) {
+          loadingText.innerText = "Video server is busy right now. Try generating again!";
           genBtn.disabled = false;
         }
       }
     }
 
     async function downloadMedia() {
-      const activeElement = currentMode === 'image' ? document.getElementById('resultImage') : document.getElementById('resultVideo');
-      if (!activeElement.src) return;
+      const type = document.getElementById('typeSelect').value;
+      const mediaTag = type === 'image' ? document.getElementById('resultImage') : document.getElementById('resultVideo');
+      
+      if (!mediaTag.src) return;
 
       try {
-        const response = await fetch(activeElement.src);
+        const response = await fetch(mediaTag.src);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = `aetherisa-${currentMode}-${Date.now()}.${currentMode === 'image' ? 'png' : 'mp4'}`;
+        a.download = `aetherisa-${Date.now()}.${type === 'image' ? 'png' : 'mp4'}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
       } catch (e) {
-        window.open(activeElement.src, '_blank');
+        window.open(mediaTag.src, '_blank');
       }
     }
   </script>
