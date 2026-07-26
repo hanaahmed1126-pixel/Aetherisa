@@ -3,114 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Image Generator</title>
+  <title>AI Media Studio - Image & Video Generator</title>
   <style>
     * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background-color: #121212;
-      color: #ffffff;
+      background-color: #0f172a;
+      color: #f8fafc;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      padding: 1rem;
+      padding: 1.5rem;
     }
-    .container {
-      text-align: center;
-      background: #1e1e1e;
+    .card {
+      background: #1e293b;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-      max-width: 500px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      max-width: 550px;
       width: 100%;
+      border: 1px solid #334155;
     }
-    input {
+    h2 { margin-top: 0; text-align: center; color: #38bdf8; }
+    
+    /* Mode Toggle Tabs */
+    .tabs {
+      display: flex;
+      background-color: #0f172a;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+      border: 1px solid #334155;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background-color: #38bdf8;
+      color: #0f172a;
+    }
+
+    label { font-size: 0.875rem; font-weight: 600; color: #94a3b8; display: block; margin-top: 1rem; margin-bottom: 0.25rem; }
+    
+    input[type="text"], select {
       width: 100%;
       padding: 12px;
-      border: 1px solid #333;
-      background-color: #2a2a2a;
+      border: 1px solid #334155;
+      background-color: #0f172a;
       color: #fff;
-      border-radius: 6px;
-      margin-bottom: 1rem;
+      border-radius: 8px;
       font-size: 1rem;
     }
-    input:focus { outline: 2px solid #007bff; }
-    button {
+    input[type="text"]:focus, select:focus { outline: 2px solid #38bdf8; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    button.action-btn {
       width: 100%;
-      padding: 12px 24px;
-      background-color: #007bff;
+      padding: 14px;
+      background-color: #0284c7;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 1rem;
       font-weight: bold;
+      margin-top: 1.25rem;
+      transition: background-color 0.2s;
     }
-    button:disabled { background-color: #555; cursor: not-allowed; }
-    #imageContainer { margin-top: 1.5rem; min-height: 200px; display: flex; align-items: center; justify-content: center; }
-    img { max-width: 100%; height: auto; border-radius: 8px; display: none; }
-    .loading { display: none; color: #aaa; margin-top: 1rem; }
+    button.action-btn:hover { background-color: #0369a1; }
+    button.action-btn:disabled { background-color: #475569; cursor: not-allowed; }
+
+    #downloadBtn {
+      background-color: #10b981;
+      display: none;
+      margin-top: 0.75rem;
+    }
+    #downloadBtn:hover { background-color: #059669; }
+
+    #mediaContainer {
+      margin-top: 1.5rem;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #0f172a;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px dashed #334155;
+    }
+    img, video { max-width: 100%; height: auto; border-radius: 8px; display: none; }
+    .loading { display: none; color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 1rem; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>AI Image Generator</h2>
-    <input type="text" id="promptInput" placeholder="Enter prompt (e.g., a cybernetic cat)..." onkeypress="handleKeyPress(event)">
-    <button id="genBtn" onclick="generateAIImage()">Generate Image</button>
+  <div class="card">
+    <h2>AI Media Studio</h2>
 
-    <p id="loadingText" class="loading">Creating image, please wait...</p>
-    
-    <div id="imageContainer">
-      <img id="resultImage" src="" alt="AI Output">
+    <div class="tabs">
+      <button class="tab-btn active" id="imageModeBtn" onclick="switchMode('image')">🎨 Image Generator</button>
+      <button class="tab-btn" id="videoModeBtn" onclick="switchMode('video')">🎬 Video Generator</button>
     </div>
+    
+    <label for="promptInput">Prompt Description</label>
+    <input type="text" id="promptInput" placeholder="Describe what you want to create..." onkeypress="handleKeyPress(event)">
+
+    <div class="grid" id="imageOptions">
+      <div>
+        <label for="modelSelect">Model</label>
+        <select id="modelSelect">
+          <option value="flux">Flux (High Detail)</option>
+          <option value="turbo">Turbo (Fast Speed)</option>
+        </select>
+      </div>
+      <div>
+        <label for="sizeSelect">Aspect Ratio</label>
+        <select id="sizeSelect">
+          <option value="512x512">Square (1:1)</option>
+          <option value="768x512">Landscape (3:2)</option>
+          <option value="512x768">Portrait (2:3)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="action-btn" id="genBtn" onclick="generateMedia()">Generate</button>
+
+    <div id="mediaContainer">
+      <p id="loadingText" class="loading">Processing... Please wait.</p>
+      <img id="resultImage" src="" alt="AI Image Output">
+      <video id="resultVideo" controls autoplay loop muted></video>
+    </div>
+
+    <button class="action-btn" id="downloadBtn" onclick="downloadMedia()">Download File</button>
   </div>
 
   <script>
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') generateAIImage();
+    let currentMode = 'image';
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('imageModeBtn').classList.toggle('active', mode === 'image');
+      document.getElementById('videoModeBtn').classList.toggle('active', mode === 'video');
+      document.getElementById('imageOptions').style.display = mode === 'image' ? 'grid' : 'none';
+
+      // Reset preview area
+      document.getElementById('resultImage').style.display = 'none';
+      document.getElementById('resultVideo').style.display = 'none';
+      document.getElementById('downloadBtn').style.display = 'none';
     }
 
-    function generateAIImage() {
-      const promptInput = document.getElementById('promptInput');
-      const prompt = promptInput.value.trim();
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') generateMedia();
+    }
+
+    function generateMedia() {
+      const prompt = document.getElementById('promptInput').value.trim();
       const imgTag = document.getElementById('resultImage');
+      const videoTag = document.getElementById('resultVideo');
       const loadingText = document.getElementById('loadingText');
-      const btn = document.getElementById('genBtn');
+      const genBtn = document.getElementById('genBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
 
       if (!prompt) {
         alert("Please enter a prompt first!");
         return;
       }
 
-      // UI state updates
+      // Hide media and start loading
       imgTag.style.display = 'none';
-      loadingText.innerText = "Creating image (takes ~5-10s)...";
+      videoTag.style.display = 'none';
+      downloadBtn.style.display = 'none';
       loadingText.style.display = 'block';
-      btn.disabled = true;
+      genBtn.disabled = true;
 
       const encodedPrompt = encodeURIComponent(prompt);
       const randomSeed = Math.floor(Math.random() * 999999);
 
-      // Direct image proxy endpoint with seed & parameters
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${randomSeed}&nologo=true`;
+      if (currentMode === 'image') {
+        const model = document.getElementById('modelSelect').value;
+        const [width, height] = document.getElementById('sizeSelect').value.split('x');
+        loadingText.innerText = "Generating image... (5-10s)";
 
-      // Set image source directly (browser handles image stream)
-      imgTag.onload = () => {
-        loadingText.style.display = 'none';
-        imgTag.style.display = 'block';
-        btn.disabled = false;
-      };
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${randomSeed}&model=${model}&nologo=true`;
 
-      imgTag.onerror = () => {
-        loadingText.innerText = "Failed to load image. Check connection and try again.";
-        btn.disabled = false;
-      };
+        imgTag.onload = () => {
+          loadingText.style.display = 'none';
+          imgTag.style.display = 'block';
+          downloadBtn.style.display = 'block';
+          genBtn.disabled = false;
+        };
+        imgTag.onerror = () => {
+          loadingText.innerText = "Failed to load image. Try again.";
+          genBtn.disabled = false;
+        };
+        imgTag.src = imageUrl;
 
-      imgTag.src = imageUrl;
+      } else {
+        // Video Generation Mode
+        loadingText.innerText = "Generating video... (this may take 15-30s)";
+        
+        // Pollinations video endpoint parameter
+        const videoUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${randomSeed}&model=luma&nologo=true`;
+
+        videoTag.onloadeddata = () => {
+          loadingText.style.display = 'none';
+          videoTag.style.display = 'block';
+          downloadBtn.style.display = 'block';
+          genBtn.disabled = false;
+        };
+        videoTag.onerror = () => {
+          loadingText.innerText = "Video rendering failed or model is busy. Please try again!";
+          genBtn.disabled = false;
+        };
+        videoTag.src = videoUrl;
+      }
+    }
+
+    async function downloadMedia() {
+      const activeElement = currentMode === 'image' ? document.getElementById('resultImage') : document.getElementById('resultVideo');
+      if (!activeElement.src) return;
+
+      try {
+        const response = await fetch(activeElement.src);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `ai-${currentMode}-${Date.now()}.${currentMode === 'image' ? 'png' : 'mp4'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      } catch (e) {
+        window.open(activeElement.src, '_blank');
+      }
     }
   </script>
 </body>
