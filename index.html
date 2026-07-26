@@ -1,12 +1,131 @@
-AI Image Generator
-  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Image Generator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      text-align: center;
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      max-width: 500px;
+      width: 100%;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #333;
+      background-color: #2a2a2a;
+      color: #fff;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: 2px solid #007bff;
+    }
+    button {
+      width: 100%;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+    button:hover { background-color: #0056b3; }
+    button:disabled { background-color: #555; cursor: not-allowed; }
+    #imageContainer { margin-top: 1.5rem; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: none;
+    }
+    .loading { display: none; color: #aaa; margin-top: 1rem; }
+  </style>
+</head>
+<body>
 
+  <div class="container">
+    <h2>AI Image Generator</h2>
+    <input type="text" id="promptInput" placeholder="Enter prompt (e.g., a cybernetic cat)..." onkeypress="handleKeyPress(event)">
+    <button id="genBtn" onclick="generateAIImage()">Generate Image</button>
 
-
-  
-    AI Image Generator
+    <p id="loadingText" class="loading">Creating image, please wait...</p>
     
-    
-    Generate Image
+    <div id="imageContainer">
+      <img id="resultImage" src="" alt="AI Output">
+    </div>
+  </div>
 
-    Creating image, please wait...
+  <script>
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        generateAIImage();
+      }
+    }
+
+    function generateAIImage() {
+      const promptInput = document.getElementById('promptInput');
+      const prompt = promptInput.value.trim();
+      const imgTag = document.getElementById('resultImage');
+      const loadingText = document.getElementById('loadingText');
+      const btn = document.getElementById('genBtn');
+
+      if (!prompt) {
+        alert("Please enter a prompt first!");
+        return;
+      }
+
+      // Hide old image, disable button, & show loading state
+      imgTag.style.display = 'none';
+      loadingText.innerText = "Creating image, please wait...";
+      loadingText.style.display = 'block';
+      btn.disabled = true;
+
+      // Encode prompt for safety & append random seed to prevent caching
+      const encodedPrompt = encodeURIComponent(prompt);
+      const randomSeed = Math.floor(Math.random() * 99999);
+      
+      // Updated Pollinations Endpoint URL
+      const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?width=512&height=512&seed=${randomSeed}&model=flux`;
+
+      // Preload image in background before showing
+      const tempImage = new Image();
+      tempImage.src = imageUrl;
+      
+      tempImage.onload = () => {
+        imgTag.src = imageUrl;
+        loadingText.style.display = 'none';
+        imgTag.style.display = 'block';
+        btn.disabled = false;
+      };
+
+      tempImage.onerror = () => {
+        loadingText.innerText = "Failed to load image. Please try again.";
+        btn.disabled = false;
+      };
+    }
+  </script>
+</body>
+</html>
