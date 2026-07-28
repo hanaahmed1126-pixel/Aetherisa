@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aetherisa AI Studio — Strict Attention Edition</title>
+  <title>Aetherisa AI Studio — Ultimate Edition</title>
   <style>
     :root {
-      --bg: #0b0f19;
-      --card: #131b2e;
+      --bg: #080c14;
+      --card: #111827;
       --accent: #38bdf8;
       --accent-hover: #0284c7;
       --text: #f3f4f6;
+      --muted: #9ca3af;
       --border: #1e293b;
     }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -21,15 +22,87 @@
       padding: 1.5rem;
       display: flex;
       justify-content: center;
+      position: relative;
     }
+
+    /* TOP LEFT FLOATING CHAT BUTTON */
+    .chat-toggle-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 100;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+      transition: transform 0.2s;
+    }
+    .chat-toggle-btn:hover { transform: scale(1.08); }
+
+    /* SLIDE-OUT SIDEBAR ASSISTANT */
+    .chat-sidebar {
+      position: fixed;
+      top: 0;
+      left: -380px;
+      width: 360px;
+      height: 100vh;
+      background: #0f172a;
+      border-right: 1px solid var(--border);
+      z-index: 99;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      padding-top: 5rem;
+    }
+    .chat-sidebar.open { left: 0; }
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .chat-msg {
+      background: #1e293b;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .chat-msg.assistant { border-left: 3px solid var(--accent); }
+    .chat-options { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .opt-btn {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .opt-btn:hover { background: var(--accent); color: #000; }
+
+    /* MAIN STUDIO LAYOUT */
     .app-container {
-      max-width: 1200px;
+      max-width: 1250px;
       width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
+      margin-top: 1rem;
     }
-    @media (max-width: 900px) { .app-container { grid-template-columns: 1fr; } }
+    @media (max-width: 960px) { .app-container { grid-template-columns: 1fr; } }
+
     .panel {
       background: var(--card);
       border: 1px solid var(--border);
@@ -37,245 +110,312 @@
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.25rem;
     }
-    h2 { margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #fff; }
-    label { font-size: 0.85rem; font-weight: 600; color: #94a3b8; }
-    textarea, select, input {
+
+    h2 { margin: 0; font-size: 1.3rem; color: #fff; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 0.4rem; }
+    textarea {
       width: 100%;
-      background: #0f172a;
+      background: #0b1120;
       border: 1px solid var(--border);
       color: #fff;
       padding: 0.75rem;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 0.9rem;
     }
-    textarea:focus, select:focus, input:focus { outline: 1px solid var(--accent); }
-    .row { display: flex; gap: 0.75rem; }
-    .row > div { flex: 1; }
-    .toggle-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: #0f172a;
-      padding: 0.75rem;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-    }
-    .toggle-box input { width: auto; cursor: pointer; }
-    button.btn-primary {
-      background: var(--accent);
-      color: #0b0f19;
-      font-weight: bold;
-      padding: 0.85rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s;
-    }
-    button.btn-primary:hover { background: var(--accent-hover); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .viewport {
-      background: #070a12;
+
+    /* DRAG-TO-DRAW BOX CANVAS */
+    .crop-canvas-container {
+      background: #050810;
       border: 1px dashed var(--border);
       border-radius: 8px;
-      min-height: 400px;
+      height: 180px;
+      position: relative;
+      cursor: crosshair;
+      overflow: hidden;
+      user-select: none;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .crop-box {
+      position: absolute;
+      border: 2px dashed var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+      pointer-events: none;
+    }
+    .crop-info { position: absolute; bottom: 8px; right: 8px; font-size: 0.75rem; color: var(--accent); font-family: monospace; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
+
+    /* ACTION BUTTONS */
+    button.btn-primary {
+      background: var(--accent);
+      color: #090d16;
+      font-weight: bold;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* SHOWCASE VIEWPORT & SPIN-SWAP GALLERY */
+    .viewport-panel { position: relative; }
+    .main-viewport {
+      background: #050810;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      min-height: 380px;
+      display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
     }
-    .viewport img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
-    .viewport .placeholder { color: #64748b; font-size: 0.9rem; text-align: center; padding: 1rem; }
-    .status { font-family: monospace; font-size: 0.85rem; color: var(--accent); }
-    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin-top: 1rem; }
-    .gallery img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); }
-    .gallery img:hover { border-color: var(--accent); }
-    .download-btn {
-      display: none;
-      background: #10b981;
+    .main-viewport img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+    .placeholder { color: var(--muted); font-size: 0.9rem; text-align: center; }
+
+    /* GENERATE AGAIN FLOATING BUTTON */
+    .gen-again-btn {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(16, 185, 129, 0.9);
       color: #fff;
-      text-decoration: none;
-      text-align: center;
-      padding: 0.6rem;
-      border-radius: 6px;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 20px;
       font-weight: bold;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      gap: 0.4rem;
+      backdrop-filter: blur(4px);
     }
+    .gen-again-btn:hover { background: #059669; }
+
+    /* THUMBNAIL BATCH GRID */
+    .batch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+    .thumb-card {
+      background: #050810;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      height: 80px;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.6s ease-in-out, border-color 0.2s;
+    }
+    .thumb-card img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-card:hover { border-color: var(--accent); }
+    .thumb-card.spinning { transform: rotateY(360deg); }
+
+    .status { font-family: monospace; font-size: 0.85rem; color: var(--accent); }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <!-- INPUT CONTROLS -->
-    <div class="panel">
-      <h2>Aetherisa Studio Settings</h2>
+  <!-- FLOATING CHAT ICON -->
+  <button class="chat-toggle-btn" onclick="toggleSidebar()" title="Toggle Assistant Sidebar">💬</button>
 
-      <div>
-        <label>Detailed Prompt (Write as much as you want!)</label>
-        <textarea id="prompt" rows="5" placeholder="Describe every detail: background, main subjects, precise colors, weather, lighting..."></textarea>
-      </div>
-
-      <div class="toggle-box" onclick="document.getElementById('strictAttention').click()">
-        <input type="checkbox" id="strictAttention" checked onclick="event.stopPropagation()">
-        <div>
-          <label style="color:#fff; cursor:pointer;">Strict Prompt Attention (De-Truncator)</label>
-          <div style="font-size:0.75rem; color:#64748b;">Weights sentence blocks so the AI doesn't skip later words.</div>
+  <!-- SLIDE-OUT ASSISTANT SIDEBAR -->
+  <div class="chat-sidebar" id="sidebar">
+    <h3 style="margin-top:0; color:#fff;">Prompt Assistant</h3>
+    <div class="chat-history" id="chatHistory">
+      <div class="chat-msg assistant">
+        Hello! I can help you build your prompt step-by-step. What main style are we going for today?
+        <div class="chat-options">
+          <button class="opt-btn" onclick="addOption('Cyberpunk, neon lighting')">Cyberpunk</button>
+          <button class="opt-btn" onclick="addOption('Photorealistic, 8k resolution')">Realistic Photo</button>
+          <button class="opt-btn" onclick="addOption('Anime art style, vibrant')">Anime</button>
+          <button class="opt-btn" onclick="addOption('Acrylic painting on canvas')">Acrylic Art</button>
         </div>
       </div>
-
-      <div class="row">
-        <div>
-          <label>Model Engine</label>
-          <select id="modelSelect">
-            <option value="flux" selected>Flux.1 (Best for Long Detailed Prompts)</option>
-            <option value="turbo">SDXL Turbo (Ultra Fast)</option>
-          </select>
-        </div>
-        <div>
-          <label>Aspect Ratio</label>
-          <select id="aspectSelect" onchange="updateDimensions()">
-            <option value="1024x1024">Square (1:1)</option>
-            <option value="1280x720">Landscape (16:9)</option>
-            <option value="720x1280">Portrait (9:16)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>Width</label>
-          <input type="number" id="width" value="1024" readonly>
-        </div>
-        <div>
-          <label>Height</label>
-          <input type="number" id="height" value="1024" readonly>
-        </div>
-      </div>
-
-      <div>
-        <label>Seed (-1 = Random)</label>
-        <input type="number" id="seed" value="-1">
-      </div>
-
-      <button class="btn-primary" id="genBtn" onclick="generateImage()">Generate Image</button>
-      <div class="status" id="status">Ready. Write your detailed prompt above!</div>
-    </div>
-
-    <!-- DISPLAY VIEWPORT & GALLERY -->
-    <div class="panel">
-      <h2>Output Canvas</h2>
-      <div class="viewport">
-        <img id="resultImg" alt="Generated Output">
-        <div class="placeholder" id="placeholder">Your rendered image will appear here.</div>
-      </div>
-
-      <a id="downloadBtn" class="download-btn" target="_blank" download="aetherisa_image.png">Download HD Image</a>
-
-      <h3>Session History</h3>
-      <div class="gallery" id="gallery"></div>
     </div>
   </div>
 
+  <!-- MAIN APP CONTAINER -->
+  <div class="app-container">
+    
+    <!-- INPUT PANEL -->
+    <div class="panel">
+      <h2>Aetherisa AI Studio</h2>
+
+      <div>
+        <label>Detailed Prompt</label>
+        <textarea id="prompt" rows="4" placeholder="Describe every feature, background, weather, and specific detail..."></textarea>
+      </div>
+
+      <!-- DRAG TO DRAW CUSTOM SHAPE BOX -->
+      <div>
+        <label>Drag Mouse to Set Custom Canvas Shape</label>
+        <div class="crop-canvas-container" id="cropCanvas">
+          <span style="color:#64748b; font-size:0.8rem; pointer-events:none;">Click & Drag to Draw Box Shape</span>
+          <div class="crop-box" id="cropBox" style="display:none;"></div>
+          <div class="crop-info" id="cropInfo">1024 x 1024 (Default)</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="genBtn" onclick="generateBatch()">Generate 4 Variations</button>
+      <div class="status" id="status">Ready for creation.</div>
+    </div>
+
+    <!-- OUTPUT SHOWCASE PANEL -->
+    <div class="panel viewport-panel">
+      <h2>Featured Showcase</h2>
+      
+      <div class="main-viewport">
+        <img id="featuredImg" alt="Featured Output">
+        <div class="placeholder" id="placeholder">Your variations will render below.</div>
+        
+        <!-- FLOATING GENERATE AGAIN BUTTON -->
+        <button class="gen-again-btn" id="againBtn" onclick="generateBatch()">🔄 Generate Again</button>
+      </div>
+
+      <h3>Batch Variations (Click to Spin & Swap)</h3>
+      <div class="batch-grid" id="batchGrid">
+        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 1</span></div>
+        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 2</span></div>
+        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 3</span></div>
+        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 4</span></div>
+      </div>
+    </div>
+
+  </div>
+
   <script>
-    function updateDimensions() {
-      const [w, h] = document.getElementById('aspectSelect').value.split('x');
-      document.getElementById('width').value = w;
-      document.getElementById('height').value = h;
+    let customDim = { w: 1024, h: 1024 };
+
+    // SIDEBAR CHAT TOGGLE
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
     }
 
-    // STRICT ATTENTION ENGINE: Breaks down prompt into weighted chunks
-    function processStrictAttention(rawPrompt) {
-      // Clean up whitespace
-      const cleanText = rawPrompt.trim();
-      if (!cleanText) return "";
-
-      // Split into sentences / major clauses
-      const clauses = cleanText.split(/[\.\n;]+/).filter(c => c.trim().length > 0);
-
-      if (clauses.length <= 1) {
-        // Single sentence: add emphasis to key detail phrases
-        return `(${cleanText}:1.2), hyper-detailed, intricate precision, highly focused, all elements rendered`;
+    // CHAT QUICK-REPLY COPY TO TEXTBOX
+    function addOption(text) {
+      const box = document.getElementById('prompt');
+      if (box.value.trim().length > 0) {
+        box.value += `, ${text}`;
+      } else {
+        box.value = text;
       }
-
-      // Multi-sentence prompt: Weight each clause individually so the end isn't skipped
-      const weightedClauses = clauses.map((clause, index) => {
-        const trimmed = clause.trim();
-        // Give slightly higher weight boost (1.3 to 1.4) to later sentences to prevent truncation
-        const weight = (1.2 + (index * 0.05)).toFixed(2);
-        return `(${trimmed}:${weight})`;
-      });
-
-      return weightedClauses.join(", ") + ", hyper-detailed, complete scene fidelity";
+      
+      // Append followup message to history
+      const history = document.getElementById('chatHistory');
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg';
+      userMsg.style.background = '#0284c7';
+      userMsg.innerText = `Added: ${text}`;
+      history.appendChild(userMsg);
+      history.scrollTop = history.scrollHeight;
     }
 
-    async function generateImage() {
-      const rawPrompt = document.getElementById('prompt').value;
-      if (!rawPrompt.trim()) return alert("Please enter a prompt!");
+    // DRAG-TO-DRAW BOX SELECTOR LOGIC
+    const cropCanvas = document.getElementById('cropCanvas');
+    const cropBox = document.getElementById('cropBox');
+    const cropInfo = document.getElementById('cropInfo');
+    let isDrawing = false, startX, startY;
 
-      const useStrict = document.getElementById('strictAttention').checked;
-      const model = document.getElementById('modelSelect').value;
-      const width = document.getElementById('width').value;
-      const height = document.getElementById('height').value;
-      let seed = parseInt(document.getElementById('seed').value);
+    cropCanvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      const rect = cropCanvas.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      cropBox.style.left = `${startX}px`;
+      cropBox.style.top = `${startY}px`;
+      cropBox.style.width = '0px';
+      cropBox.style.height = '0px';
+      cropBox.style.display = 'block';
+    });
+
+    cropCanvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = cropCanvas.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+
+      const width = Math.abs(currentX - startX);
+      const height = Math.abs(currentY - startY);
+
+      cropBox.style.width = `${width}px`;
+      cropBox.style.height = `${height}px`;
+      cropBox.style.left = `${Math.min(startX, currentX)}px`;
+      cropBox.style.top = `${Math.min(startY, currentY)}px`;
+
+      // Scale up rectangle dimensions to actual AI canvas size
+      const targetW = Math.max(512, Math.round((width / rect.width) * 1536));
+      const targetH = Math.max(512, Math.round((height / rect.height) * 1536));
+      customDim = { w: targetW, h: targetH };
+      cropInfo.innerText = `${targetW} x ${targetH}`;
+    });
+
+    window.addEventListener('mouseup', () => { isDrawing = false; });
+
+    // MULTI-IMAGE BATCH GENERATION
+    async function generateBatch() {
+      const prompt = document.getElementById('prompt').value.trim();
+      if (!prompt) return alert("Please enter a prompt!");
 
       const btn = document.getElementById('genBtn');
       const status = document.getElementById('status');
-      const img = document.getElementById('resultImg');
+      const featuredImg = document.getElementById('featuredImg');
       const placeholder = document.getElementById('placeholder');
-      const downloadBtn = document.getElementById('downloadBtn');
+      const againBtn = document.getElementById('againBtn');
+      const batchGrid = document.getElementById('batchGrid');
 
       btn.disabled = true;
-      status.innerText = "Applying strict attention rules and sending to model...";
+      status.innerText = "Rendering 4 variations simultaneously...";
 
-      if (seed === -1) {
-        seed = Math.floor(Math.random() * 100000000);
+      const encodedPrompt = encodeURIComponent(`(${prompt}:1.3), hyper-detailed, intricate precision`);
+      batchGrid.innerHTML = ''; // Clear previous thumbnails
+
+      const urls = [];
+      for (let i = 0; i < 4; i++) {
+        const seed = Math.floor(Math.random() * 100000000);
+        urls.push(`https://pollinations.ai/p/${encodedPrompt}?width=${customDim.w}&height=${customDim.h}&seed=${seed}&model=flux&nologo=true`);
       }
 
-      // Process prompt through Attention Engine if enabled
-      const finalPrompt = useStrict ? processStrictAttention(rawPrompt) : rawPrompt;
-      const encodedPrompt = encodeURIComponent(finalPrompt);
+      // Auto-set the first variation into the main view
+      featuredImg.src = urls[0];
+      featuredImg.style.display = 'block';
+      placeholder.style.display = 'none';
+      againBtn.style.display = 'flex';
 
-      // Route through Pollinations API with Flux model & direct parameters
-      const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=${model}&nologo=true`;
+      // Build 4 thumbnails with spin-swap logic
+      urls.forEach((url, idx) => {
+        const card = document.createElement('div');
+        card.className = 'thumb-card';
+        const img = document.createElement('img');
+        img.src = url;
+        card.appendChild(img);
 
-      const tempImg = new Image();
-      tempImg.src = imageUrl;
+        card.onclick = () => {
+          // Trigger 360 spin animation
+          card.classList.add('spinning');
+          setTimeout(() => {
+            // Swap thumbnail image with main featured image
+            const currentFeatured = featuredImg.src;
+            featuredImg.src = url;
+            img.src = currentFeatured;
+            card.classList.remove('spinning');
+          }, 300);
+        };
 
-      tempImg.onload = function() {
-        img.src = imageUrl;
-        img.style.display = 'block';
-        placeholder.style.display = 'none';
-        status.innerText = `Done! Model: ${model.toUpperCase()} | Seed: ${seed}`;
-        btn.disabled = false;
+        batchGrid.appendChild(card);
+      });
 
-        // Setup download link
-        downloadBtn.href = imageUrl;
-        downloadBtn.style.display = 'block';
-
-        // Add to Session Gallery
-        addToGallery(imageUrl);
-      };
-
-      tempImg.onerror = function() {
-        status.innerText = "Error fetching image. Try simplifying the prompt slightly.";
-        btn.disabled = false;
-      };
-    }
-
-    function addToGallery(url) {
-      const gallery = document.getElementById('gallery');
-      const thumb = document.createElement('img');
-      thumb.src = url;
-      thumb.onclick = () => {
-        document.getElementById('resultImg').src = url;
-        document.getElementById('downloadBtn').href = url;
-      };
-      gallery.prepend(thumb);
+      status.innerText = "Batch render complete! Click any thumbnail to spin & swap.";
+      btn.disabled = false;
     }
   </script>
 </body>
