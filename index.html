@@ -3,134 +3,285 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aetherisa AI Studio — Ultimate Edition</title>
+  <title>Aetherisa AI Studio — Cyber Edition</title>
   <style>
     :root {
-      --bg: #080c14;
-      --card: #111827;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
+      --bg: #030712;
+      --panel: rgba(17, 24, 39, 0.7);
+      --border: rgba(56, 189, 248, 0.2);
+      --accent-neon: #00f0ff;
+      --pink-neon: #ff007f;
       --text: #f3f4f6;
-      --muted: #9ca3af;
-      --border: #1e293b;
+      --muted: #6b7280;
     }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
     body {
       background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(255, 0, 127, 0.08) 0%, transparent 40%);
       color: var(--text);
       margin: 0;
       padding: 1.5rem;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
-      position: relative;
+      align-items: center;
     }
 
-    /* TOP LEFT FLOATING CHAT BUTTON */
+    /* FLOATING CHAT TOGGLE BUTTON */
     .chat-toggle-btn {
       position: fixed;
-      top: 1rem;
-      left: 1rem;
+      top: 1.5rem;
+      left: 1.5rem;
       z-index: 100;
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent-neon), var(--pink-neon));
       color: #000;
       border: none;
       border-radius: 50%;
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
-      transition: transform 0.2s;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .chat-toggle-btn:hover { transform: scale(1.08); }
+    .chat-toggle-btn:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 0 30px rgba(255, 0, 127, 0.6);
+    }
 
-    /* SLIDE-OUT SIDEBAR ASSISTANT */
+    /* SIDEBAR CHAT DRAFTING BOARD */
     .chat-sidebar {
       position: fixed;
       top: 0;
-      left: -380px;
-      width: 360px;
+      left: -420px;
+      width: 380px;
       height: 100vh;
-      background: #0f172a;
+      background: rgba(10, 15, 30, 0.85);
+      backdrop-filter: blur(16px);
       border-right: 1px solid var(--border);
       z-index: 99;
-      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-      transition: left 0.3s ease;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+      transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      padding: 1rem;
-      padding-top: 5rem;
+      padding: 1.5rem;
+      padding-top: 5.5rem;
     }
     .chat-sidebar.open { left: 0; }
+
     .chat-history {
       flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 1rem;
       margin-bottom: 1rem;
     }
+    
     .chat-msg {
-      background: #1e293b;
-      padding: 0.75rem;
-      border-radius: 8px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+      border-radius: 10px;
       font-size: 0.85rem;
       line-height: 1.4;
+      backdrop-filter: blur(4px);
     }
-    .chat-msg.assistant { border-left: 3px solid var(--accent); }
-    .chat-options { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .chat-msg.assistant { border-left: 3px solid var(--accent-neon); }
+
+    .chat-options { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
     .opt-btn {
-      background: #334155;
-      color: #fff;
-      border: none;
-      padding: 0.35rem 0.6rem;
-      border-radius: 4px;
+      background: rgba(51, 65, 85, 0.5);
+      color: var(--accent-neon);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
       font-size: 0.75rem;
       cursor: pointer;
+      transition: all 0.2s;
     }
-    .opt-btn:hover { background: var(--accent); color: #000; }
+    .opt-btn:hover {
+      background: var(--accent-neon);
+      color: #000;
+      box-shadow: 0 0 10px var(--accent-neon);
+    }
 
-    /* MAIN STUDIO LAYOUT */
+    .chat-input-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .chat-input-area textarea {
+      width: 100%;
+      height: 75px;
+      resize: none;
+      background: rgba(3, 7, 18, 0.8);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .chat-input-area textarea:focus { border-color: var(--accent-neon); }
+
+    .btn-transfer {
+      background: linear-gradient(90deg, var(--accent-neon), #38bdf8);
+      color: #000;
+      border: none;
+      padding: 0.65rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    .btn-transfer:hover { box-shadow: 0 0 15px var(--accent-neon); }
+
+    /* MAIN GLASS CONTAINER */
     .app-container {
-      max-width: 1250px;
+      max-width: 1280px;
       width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-top: 1rem;
+      gap: 2rem;
     }
     @media (max-width: 960px) { .app-container { grid-template-columns: 1fr; } }
 
     .panel {
-      background: var(--card);
+      background: var(--panel);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
+      border-radius: 16px;
+      padding: 1.75rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      position: relative;
     }
 
-    h2 { margin: 0; font-size: 1.3rem; color: #fff; }
-    label { font-size: 0.85rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 0.4rem; }
-    textarea {
+    h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #fff, var(--accent-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea.main-prompt {
       width: 100%;
-      background: #0b1120;
+      background: rgba(3, 7, 18, 0.6);
       border: 1px solid var(--border);
       color: #fff;
-      padding: 0.75rem;
-      border-radius: 8px;
+      padding: 0.85rem;
+      border-radius: 10px;
       font-size: 0.9rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+    textarea.main-prompt:focus { border-color: var(--accent-neon); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+
+    /* ASPECT RATIO & SHAPE CONTROLS */
+    .ratio-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .ratio-btn {
+      flex: 1;
+      min-width: 80px;
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .ratio-btn:hover, .ratio-btn.active {
+      border-color: var(--accent-neon);
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-neon);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
     }
 
-    /* DRAG-TO-DRAW BOX CANVAS */
-    .crop-canvas-container {
-      background: #050810;
-      border: 1px dashed var(--border);
+    .btn-draw-shape {
+      background: rgba(255, 0, 127, 0.15);
+      border: 1px solid var(--pink-neon);
+      color: #fff;
+      padding: 0.6rem 1rem;
       border-radius: 8px;
-      height: 180px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-draw-shape:hover {
+      background: var(--pink-neon);
+      color: #000;
+      box-shadow: 0 0 15px var(--pink-neon);
+    }
+
+    /* FUTURISTIC POP-UP MODAL FOR DRAWING SHAPE */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: rgba(17, 24, 39, 0.95);
+      border: 1px solid var(--pink-neon);
+      box-shadow: 0 0 30px rgba(255, 0, 127, 0.4);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .crop-canvas-container {
+      background: rgba(3, 7, 18, 0.95);
+      border: 1px dashed var(--pink-neon);
+      border-radius: 10px;
+      height: 220px;
       position: relative;
       cursor: crosshair;
       overflow: hidden;
@@ -141,110 +292,147 @@
     }
     .crop-box {
       position: absolute;
-      border: 2px dashed var(--accent);
-      background: rgba(56, 189, 248, 0.15);
+      border: 2px solid var(--pink-neon);
+      background: rgba(255, 0, 127, 0.15);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
       pointer-events: none;
     }
-    .crop-info { position: absolute; bottom: 8px; right: 8px; font-size: 0.75rem; color: var(--accent); font-family: monospace; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
-
-    /* ACTION BUTTONS */
-    button.btn-primary {
-      background: var(--accent);
-      color: #090d16;
-      font-weight: bold;
-      padding: 0.9rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
+    .crop-info {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 0.75rem;
+      color: var(--pink-neon);
+      font-family: monospace;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--pink-neon);
     }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* SHOWCASE VIEWPORT & SPIN-SWAP GALLERY */
-    .viewport-panel { position: relative; }
+    button.btn-primary {
+      background: linear-gradient(135deg, var(--accent-neon), #0284c7);
+      color: #000;
+      font-weight: 800;
+      padding: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+      transition: all 0.3s;
+    }
+    button.btn-primary:hover {
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+      transform: translateY(-2px);
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+    /* FEATURED SHOWCASE VIEWPORT */
     .main-viewport {
-      background: #050810;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
+      background: rgba(3, 7, 18, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       min-height: 380px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
     }
-    .main-viewport img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
-    .placeholder { color: var(--muted); font-size: 0.9rem; text-align: center; }
-
-    /* GENERATE AGAIN FLOATING BUTTON */
-    .gen-again-btn {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      background: rgba(16, 185, 129, 0.9);
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    .main-viewport img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       display: none;
-      align-items: center;
-      gap: 0.4rem;
-      backdrop-filter: blur(4px);
+      transition: opacity 0.4s ease;
     }
-    .gen-again-btn:hover { background: #059669; }
+    
+    .loading-spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(0, 240, 255, 0.1);
+      border-top: 3px solid var(--accent-neon);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* THUMBNAIL BATCH GRID */
+    .placeholder { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* SPIN & SWAP BATCH THUMBNAILS */
     .batch-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.6rem;
+      gap: 0.75rem;
       margin-top: 0.5rem;
     }
     .thumb-card {
-      background: #050810;
+      background: rgba(3, 7, 18, 0.8);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      height: 80px;
+      border-radius: 8px;
+      height: 85px;
       cursor: pointer;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.6s ease-in-out, border-color 0.2s;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .thumb-card img { width: 100%; height: 100%; object-fit: cover; }
-    .thumb-card:hover { border-color: var(--accent); }
-    .thumb-card.spinning { transform: rotateY(360deg); }
+    .thumb-card:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      transform: translateY(-3px);
+    }
+    
+    .thumb-card.spinning {
+      transform: rotateY(360deg) scale(0.9);
+      border-color: var(--pink-neon);
+      box-shadow: 0 0 20px var(--pink-neon);
+    }
 
-    .status { font-family: monospace; font-size: 0.85rem; color: var(--accent); }
+    .status {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--accent-neon);
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- FLOATING CHAT ICON -->
-  <button class="chat-toggle-btn" onclick="toggleSidebar()" title="Toggle Assistant Sidebar">💬</button>
+  <!-- CHAT TOGGLE BUTTON -->
+  <button class="chat-toggle-btn" onclick="toggleSidebar()" title="Toggle Cyber Prompt Assistant">⚡</button>
 
-  <!-- SLIDE-OUT ASSISTANT SIDEBAR -->
+  <!-- SIDEBAR PROMPT ASSISTANT -->
   <div class="chat-sidebar" id="sidebar">
-    <h3 style="margin-top:0; color:#fff;">Prompt Assistant</h3>
+    <h3 style="margin:0; color:#fff; text-transform:uppercase; letter-spacing:1px; font-size:1.1rem;">Prompt Builder</h3>
     <div class="chat-history" id="chatHistory">
       <div class="chat-msg assistant">
-        Hello! I can help you build your prompt step-by-step. What main style are we going for today?
+        Click presets below to compose directly into your draft text box:
         <div class="chat-options">
-          <button class="opt-btn" onclick="addOption('Cyberpunk, neon lighting')">Cyberpunk</button>
-          <button class="opt-btn" onclick="addOption('Photorealistic, 8k resolution')">Realistic Photo</button>
-          <button class="opt-btn" onclick="addOption('Anime art style, vibrant')">Anime</button>
-          <button class="opt-btn" onclick="addOption('Acrylic painting on canvas')">Acrylic Art</button>
+          <button class="opt-btn" onclick="appendToChatBox('Cyberpunk neon cityscape')">Cyberpunk</button>
+          <button class="opt-btn" onclick="appendToChatBox('8k photorealistic portrait')">Photorealistic</button>
+          <button class="opt-btn" onclick="appendToChatBox('Futuristic mecha anime concept')">Mecha Anime</button>
+          <button class="opt-btn" onclick="appendToChatBox('Acrylic paint texture, vivid details')">Acrylic Art</button>
+          <button class="opt-btn" onclick="appendToChatBox('Volumetric cinematic studio lighting')">Cinematic</button>
         </div>
       </div>
     </div>
+
+    <div class="chat-input-area">
+      <textarea id="chatInput" placeholder="Click options above or type custom details..."></textarea>
+      <button class="btn-transfer" onclick="transferPromptToMain()">Transfer To Main Generator ➔</button>
+    </div>
   </div>
 
-  <!-- MAIN APP CONTAINER -->
+  <!-- MAIN APP GRID -->
   <div class="app-container">
     
     <!-- INPUT PANEL -->
@@ -252,75 +440,114 @@
       <h2>Aetherisa AI Studio</h2>
 
       <div>
-        <label>Detailed Prompt</label>
-        <textarea id="prompt" rows="4" placeholder="Describe every feature, background, weather, and specific detail..."></textarea>
+        <label>Active Generation Prompt</label>
+        <textarea id="prompt" class="main-prompt" rows="4" placeholder="Describe your image in detail..."></textarea>
       </div>
 
-      <!-- DRAG TO DRAW CUSTOM SHAPE BOX -->
+      <!-- ASPECT RATIO SELECTION & POP-UP BUTTON -->
       <div>
-        <label>Drag Mouse to Set Custom Canvas Shape</label>
-        <div class="crop-canvas-container" id="cropCanvas">
-          <span style="color:#64748b; font-size:0.8rem; pointer-events:none;">Click & Drag to Draw Box Shape</span>
-          <div class="crop-box" id="cropBox" style="display:none;"></div>
-          <div class="crop-info" id="cropInfo">1024 x 1024 (Default)</div>
+        <label>Image Aspect Ratio & Canvas Shape</label>
+        <div class="ratio-bar">
+          <button class="ratio-btn" onclick="setDimensions(1024, 1024, this)">Square (1:1)</button>
+          <button class="ratio-btn active" onclick="setDimensions(768, 1344, this)">Portrait (9:16)</button>
+          <button class="ratio-btn" onclick="setDimensions(1344, 768, this)">Landscape (16:9)</button>
+          <button class="btn-draw-shape" onclick="openModal()">📐 Custom Shape</button>
         </div>
       </div>
 
       <button class="btn-primary" id="genBtn" onclick="generateBatch()">Generate 4 Variations</button>
-      <div class="status" id="status">Ready for creation.</div>
+      <div class="status" id="status">SYS STATUS: READY (PORTRAIT 9:16)</div>
     </div>
 
-    <!-- OUTPUT SHOWCASE PANEL -->
-    <div class="panel viewport-panel">
-      <h2>Featured Showcase</h2>
+    <!-- SHOWCASE VIEWPORT PANEL -->
+    <div class="panel">
+      <h2>Showcase Viewport</h2>
       
       <div class="main-viewport">
+        <div class="loading-spinner" id="spinner"></div>
         <img id="featuredImg" alt="Featured Output">
-        <div class="placeholder" id="placeholder">Your variations will render below.</div>
-        
-        <!-- FLOATING GENERATE AGAIN BUTTON -->
-        <button class="gen-again-btn" id="againBtn" onclick="generateBatch()">🔄 Generate Again</button>
+        <div class="placeholder" id="placeholder">Variations will display here</div>
       </div>
 
-      <h3>Batch Variations (Click to Spin & Swap)</h3>
+      <label style="margin-top:0.5rem;">Batch Variations (Click to Spin & Swap)</label>
       <div class="batch-grid" id="batchGrid">
-        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 1</span></div>
-        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 2</span></div>
-        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 3</span></div>
-        <div class="thumb-card"><span style="color:#334155; font-size:0.75rem;">Var 4</span></div>
+        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 1</span></div>
+        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 2</span></div>
+        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 3</span></div>
+        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 4</span></div>
       </div>
     </div>
 
   </div>
 
-  <script>
-    let customDim = { w: 1024, h: 1024 };
+  <!-- FUTURISTIC DRAW SHAPE POP-UP MODAL -->
+  <div class="modal-overlay" id="shapeModal">
+    <div class="modal-card">
+      <h3 style="margin:0; color:#fff; text-transform:uppercase; letter-spacing:1px; font-size:1rem; color:var(--pink-neon);">Custom Canvas Matrix</h3>
+      <p style="margin:0; font-size:0.8rem; color:var(--muted);">Click and drag below to set your exact canvas aspect bounds:</p>
+      
+      <div class="crop-canvas-container" id="cropCanvas">
+        <span style="color:var(--muted); font-size:0.8rem; pointer-events:none;">CLICK & DRAG TO DRAW SHAPE</span>
+        <div class="crop-box" id="cropBox" style="display:none;"></div>
+        <div class="crop-info" id="cropInfo">1024 x 1024</div>
+      </div>
 
-    // SIDEBAR CHAT TOGGLE
+      <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+        <button class="ratio-btn" onclick="closeModal()">Cancel</button>
+        <button class="btn-draw-shape" onclick="applyCustomShape()">Apply Shape ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let customDim = { w: 768, h: 1344 }; // Default Portrait
+
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
     }
 
-    // CHAT QUICK-REPLY COPY TO TEXTBOX
-    function addOption(text) {
-      const box = document.getElementById('prompt');
-      if (box.value.trim().length > 0) {
-        box.value += `, ${text}`;
+    function appendToChatBox(text) {
+      const chatInput = document.getElementById('chatInput');
+      if (chatInput.value.trim().length > 0) {
+        chatInput.value += `, ${text}`;
       } else {
-        box.value = text;
+        chatInput.value = text;
       }
-      
-      // Append followup message to history
+    }
+
+    function transferPromptToMain() {
+      const chatText = document.getElementById('chatInput').value.trim();
+      if (!chatText) return alert("Draft box is empty!");
+
+      document.getElementById('prompt').value = chatText;
+
       const history = document.getElementById('chatHistory');
-      const userMsg = document.createElement('div');
-      userMsg.className = 'chat-msg';
-      userMsg.style.background = '#0284c7';
-      userMsg.innerText = `Added: ${text}`;
-      history.appendChild(userMsg);
+      const log = document.createElement('div');
+      log.className = 'chat-msg';
+      log.style.borderLeft = '3px solid #00f0ff';
+      log.innerText = `Transferred prompt to main studio!`;
+      history.appendChild(log);
       history.scrollTop = history.scrollHeight;
     }
 
-    // DRAG-TO-DRAW BOX SELECTOR LOGIC
+    /* ASPECT RATIO PRESET SELECTION */
+    function setDimensions(w, h, btn) {
+      customDim = { w, h };
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('status').innerText = `SYS STATUS: READY (${w} x ${h})`;
+    }
+
+    /* MODAL POP-UP LOGIC */
+    function openModal() { document.getElementById('shapeModal').classList.add('active'); }
+    function closeModal() { document.getElementById('shapeModal').classList.remove('active'); }
+    function applyCustomShape() {
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('status').innerText = `SYS STATUS: CUSTOM DIMENSIONS (${customDim.w} x ${customDim.h})`;
+      closeModal();
+    }
+
+    /* DRAG TO DRAW SHAPE IN MODAL */
     const cropCanvas = document.getElementById('cropCanvas');
     const cropBox = document.getElementById('cropBox');
     const cropInfo = document.getElementById('cropInfo');
@@ -352,7 +579,6 @@
       cropBox.style.left = `${Math.min(startX, currentX)}px`;
       cropBox.style.top = `${Math.min(startY, currentY)}px`;
 
-      // Scale up rectangle dimensions to actual AI canvas size
       const targetW = Math.max(512, Math.round((width / rect.width) * 1536));
       const targetH = Math.max(512, Math.round((height / rect.height) * 1536));
       customDim = { w: targetW, h: targetH };
@@ -361,49 +587,52 @@
 
     window.addEventListener('mouseup', () => { isDrawing = false; });
 
-    // MULTI-IMAGE BATCH GENERATION
+    /* BATCH GENERATION */
     async function generateBatch() {
-      const prompt = document.getElementById('prompt').value.trim();
-      if (!prompt) return alert("Please enter a prompt!");
+      const rawPrompt = document.getElementById('prompt').value.trim();
+      if (!rawPrompt) return alert("Please enter a prompt!");
 
       const btn = document.getElementById('genBtn');
       const status = document.getElementById('status');
       const featuredImg = document.getElementById('featuredImg');
       const placeholder = document.getElementById('placeholder');
-      const againBtn = document.getElementById('againBtn');
+      const spinner = document.getElementById('spinner');
       const batchGrid = document.getElementById('batchGrid');
 
       btn.disabled = true;
-      status.innerText = "Rendering 4 variations simultaneously...";
+      status.innerText = "SYS STATUS: RENDERING BATCH...";
+      placeholder.style.display = 'none';
+      featuredImg.style.display = 'none';
+      spinner.style.display = 'block';
 
-      const encodedPrompt = encodeURIComponent(`(${prompt}:1.3), hyper-detailed, intricate precision`);
-      batchGrid.innerHTML = ''; // Clear previous thumbnails
+      const cleanPrompt = encodeURIComponent(rawPrompt);
+      batchGrid.innerHTML = '';
 
       const urls = [];
       for (let i = 0; i < 4; i++) {
-        const seed = Math.floor(Math.random() * 100000000);
-        urls.push(`https://pollinations.ai/p/${encodedPrompt}?width=${customDim.w}&height=${customDim.h}&seed=${seed}&model=flux&nologo=true`);
+        const seed = Math.floor(Math.random() * 9999999);
+        urls.push(`https://image.pollinations.ai/prompt/${cleanPrompt}?width=${customDim.w}&height=${customDim.h}&seed=${seed}&nologo=true&model=flux`);
       }
 
-      // Auto-set the first variation into the main view
-      featuredImg.src = urls[0];
-      featuredImg.style.display = 'block';
-      placeholder.style.display = 'none';
-      againBtn.style.display = 'flex';
+      const mainImgLoader = new Image();
+      mainImgLoader.src = urls[0];
+      mainImgLoader.onload = () => {
+        spinner.style.display = 'none';
+        featuredImg.src = urls[0];
+        featuredImg.style.display = 'block';
+      };
 
-      // Build 4 thumbnails with spin-swap logic
-      urls.forEach((url, idx) => {
+      urls.forEach((url) => {
         const card = document.createElement('div');
         card.className = 'thumb-card';
+        
         const img = document.createElement('img');
         img.src = url;
         card.appendChild(img);
 
         card.onclick = () => {
-          // Trigger 360 spin animation
           card.classList.add('spinning');
           setTimeout(() => {
-            // Swap thumbnail image with main featured image
             const currentFeatured = featuredImg.src;
             featuredImg.src = url;
             img.src = currentFeatured;
@@ -414,7 +643,7 @@
         batchGrid.appendChild(card);
       });
 
-      status.innerText = "Batch render complete! Click any thumbnail to spin & swap.";
+      status.innerText = "SYS STATUS: BATCH READY (CLICK TO SWAP)";
       btn.disabled = false;
     }
   </script>
