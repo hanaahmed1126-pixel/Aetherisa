@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aetherisa AI Studio — Cyber Edition</title>
+  <title>Aetherisa AI Studio — Dynamic Edition</title>
   <style>
     :root {
       --bg: #030712;
-      --panel: rgba(17, 24, 39, 0.7);
-      --border: rgba(56, 189, 248, 0.2);
+      --panel: rgba(17, 24, 39, 0.75);
+      --border: rgba(56, 189, 248, 0.25);
       --accent-neon: #00f0ff;
       --pink-neon: #ff007f;
       --text: #f3f4f6;
       --muted: #6b7280;
+      --sidebar-width: 380px;
     }
 
     * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -24,11 +25,9 @@
         radial-gradient(circle at 85% 85%, rgba(255, 0, 127, 0.08) 0%, transparent 40%);
       color: var(--text);
       margin: 0;
-      padding: 1.5rem;
+      padding: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      overflow-x: hidden;
     }
 
     /* FLOATING CHAT TOGGLE BUTTON */
@@ -47,6 +46,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 1.2rem;
       box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -55,73 +55,104 @@
       box-shadow: 0 0 30px rgba(255, 0, 127, 0.6);
     }
 
-    /* SIDEBAR CHAT DRAFTING BOARD */
+    /* NORMAL CHAT BOX SIDEBAR */
     .chat-sidebar {
       position: fixed;
       top: 0;
-      left: -420px;
-      width: 380px;
+      left: calc(-1 * var(--sidebar-width));
+      width: var(--sidebar-width);
       height: 100vh;
-      background: rgba(10, 15, 30, 0.85);
-      backdrop-filter: blur(16px);
+      background: rgba(10, 15, 30, 0.92);
+      backdrop-filter: blur(20px);
       border-right: 1px solid var(--border);
       z-index: 99;
       box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
       transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      padding: 1.5rem;
+      padding: 1.25rem;
       padding-top: 5.5rem;
     }
     .chat-sidebar.open { left: 0; }
 
-    .chat-history {
+    .chat-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent-neon);
+    }
+
+    /* CHAT STREAM & BUBBLES */
+    .chat-stream {
       flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      padding-right: 0.5rem;
       margin-bottom: 1rem;
     }
-    
-    .chat-msg {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid var(--border);
-      padding: 0.85rem;
-      border-radius: 10px;
+
+    .msg-bubble {
+      max-width: 85%;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
       font-size: 0.85rem;
       line-height: 1.4;
-      backdrop-filter: blur(4px);
     }
-    .chat-msg.assistant { border-left: 3px solid var(--accent-neon); }
+    .msg-bubble.assistant {
+      align-self: flex-start;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-top-left-radius: 2px;
+    }
+    .msg-bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 127, 0.2));
+      border: 1px solid var(--accent-neon);
+      color: #fff;
+      border-top-right-radius: 2px;
+    }
 
-    .chat-options { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
-    .opt-btn {
-      background: rgba(51, 65, 85, 0.5);
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+    .chip {
+      background: rgba(51, 65, 85, 0.6);
       color: var(--accent-neon);
       border: 1px solid rgba(0, 240, 255, 0.3);
       padding: 0.35rem 0.65rem;
-      border-radius: 6px;
+      border-radius: 20px;
       font-size: 0.75rem;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .opt-btn:hover {
+    .chip:hover {
       background: var(--accent-neon);
       color: #000;
       box-shadow: 0 0 10px var(--accent-neon);
     }
 
-    .chat-input-area {
+    /* CHAT INPUT AREA */
+    .chat-input-box {
       display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.5rem;
       border-top: 1px solid var(--border);
       padding-top: 1rem;
     }
-    .chat-input-area textarea {
-      width: 100%;
-      height: 75px;
+    .chat-input-box textarea {
+      flex: 1;
+      height: 48px;
       resize: none;
       background: rgba(3, 7, 18, 0.8);
       border: 1px solid var(--border);
@@ -131,25 +162,36 @@
       font-size: 0.85rem;
       outline: none;
     }
-    .chat-input-area textarea:focus { border-color: var(--accent-neon); }
+    .chat-input-box textarea:focus { border-color: var(--accent-neon); }
 
-    .btn-transfer {
-      background: linear-gradient(90deg, var(--accent-neon), #38bdf8);
+    .btn-send {
+      background: var(--accent-neon);
       color: #000;
       border: none;
-      padding: 0.65rem;
+      padding: 0 1rem;
       border-radius: 8px;
-      font-size: 0.85rem;
       font-weight: bold;
       cursor: pointer;
-      letter-spacing: 0.5px;
       transition: all 0.2s;
     }
-    .btn-transfer:hover { box-shadow: 0 0 15px var(--accent-neon); }
+    .btn-send:hover { box-shadow: 0 0 12px var(--accent-neon); }
 
-    /* MAIN GLASS CONTAINER */
+    /* SLIDING MAIN WRAPPER */
+    .main-wrapper {
+      padding: 2rem;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* SLIDE RIGHT WHEN CHAT IS OPEN */
+    body.chat-open .main-wrapper {
+      transform: translateX(calc(var(--sidebar-width) / 2));
+    }
+
     .app-container {
-      max-width: 1280px;
+      max-width: 1200px;
       width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -167,7 +209,6 @@
       flex-direction: column;
       gap: 1.25rem;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      position: relative;
     }
 
     h2 {
@@ -203,54 +244,87 @@
     }
     textarea.main-prompt:focus { border-color: var(--accent-neon); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
 
-    /* ASPECT RATIO & SHAPE CONTROLS */
-    .ratio-bar {
-      display: flex;
+    /* PERFORMANCE TOGGLE */
+    .engine-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .ratio-btn {
-      flex: 1;
-      min-width: 80px;
       background: rgba(3, 7, 18, 0.6);
+      padding: 0.25rem;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      color: var(--text);
+    }
+    .engine-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
       padding: 0.6rem;
       border-radius: 8px;
       font-size: 0.8rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
-      text-align: center;
+      text-transform: uppercase;
     }
-    .ratio-btn:hover, .ratio-btn.active {
+    .engine-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-neon);
+      border: 1px solid var(--accent-neon);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+
+    /* ASPECT RATIO CARDS & DRAW SHAPE MODAL BUTTON */
+    .ratio-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) auto;
+      gap: 0.5rem;
+    }
+    .ratio-card {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 0.4rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .ratio-card:hover, .ratio-card.active {
       border-color: var(--accent-neon);
       background: rgba(0, 240, 255, 0.15);
       color: var(--accent-neon);
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
     }
 
-    .btn-draw-shape {
+    .btn-draw-modal {
       background: rgba(255, 0, 127, 0.15);
       border: 1px solid var(--pink-neon);
       color: #fff;
-      padding: 0.6rem 1rem;
+      padding: 0.6rem 0.8rem;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      justify-content: center;
+      gap: 0.25rem;
     }
-    .btn-draw-shape:hover {
+    .btn-draw-modal:hover {
       background: var(--pink-neon);
       color: #000;
       box-shadow: 0 0 15px var(--pink-neon);
     }
 
-    /* FUTURISTIC POP-UP MODAL FOR DRAWING SHAPE */
+    /* POPUP MODAL FOR CUSTOM DRAWING */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -260,7 +334,6 @@
       display: none;
       align-items: center;
       justify-content: center;
-      animation: fadeIn 0.3s ease;
     }
     .modal-overlay.active { display: flex; }
 
@@ -330,7 +403,7 @@
     }
     button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
-    /* FEATURED SHOWCASE VIEWPORT */
+    /* SHOWCASE VIEWPORT */
     .main-viewport {
       background: rgba(3, 7, 18, 0.9);
       border: 1px solid var(--border);
@@ -348,13 +421,12 @@
       height: 100%;
       object-fit: contain;
       display: none;
-      transition: opacity 0.4s ease;
     }
     
     .loading-spinner {
       display: none;
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border: 3px solid rgba(0, 240, 255, 0.1);
       border-top: 3px solid var(--accent-neon);
       border-radius: 50%;
@@ -364,7 +436,7 @@
 
     .placeholder { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
 
-    /* SPIN & SWAP BATCH THUMBNAILS */
+    /* BATCH THUMBNAILS WITH SPIN & SWAP */
     .batch-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -407,83 +479,109 @@
 </head>
 <body>
 
-  <!-- CHAT TOGGLE BUTTON -->
-  <button class="chat-toggle-btn" onclick="toggleSidebar()" title="Toggle Cyber Prompt Assistant">⚡</button>
+  <!-- FLOATING CHAT BUTTON -->
+  <button class="chat-toggle-btn" onclick="toggleSidebar()" title="Toggle Assistant Sidebar">⚡</button>
 
-  <!-- SIDEBAR PROMPT ASSISTANT -->
+  <!-- SIDEBAR NORMAL CHAT BOX -->
   <div class="chat-sidebar" id="sidebar">
-    <h3 style="margin:0; color:#fff; text-transform:uppercase; letter-spacing:1px; font-size:1.1rem;">Prompt Builder</h3>
-    <div class="chat-history" id="chatHistory">
-      <div class="chat-msg assistant">
-        Click presets below to compose directly into your draft text box:
-        <div class="chat-options">
-          <button class="opt-btn" onclick="appendToChatBox('Cyberpunk neon cityscape')">Cyberpunk</button>
-          <button class="opt-btn" onclick="appendToChatBox('8k photorealistic portrait')">Photorealistic</button>
-          <button class="opt-btn" onclick="appendToChatBox('Futuristic mecha anime concept')">Mecha Anime</button>
-          <button class="opt-btn" onclick="appendToChatBox('Acrylic paint texture, vivid details')">Acrylic Art</button>
-          <button class="opt-btn" onclick="appendToChatBox('Volumetric cinematic studio lighting')">Cinematic</button>
-        </div>
-      </div>
+    <div class="chat-header">
+      <h3>Aetherisa Assistant</h3>
     </div>
-
-    <div class="chat-input-area">
-      <textarea id="chatInput" placeholder="Click options above or type custom details..."></textarea>
-      <button class="btn-transfer" onclick="transferPromptToMain()">Transfer To Main Generator ➔</button>
-    </div>
-  </div>
-
-  <!-- MAIN APP GRID -->
-  <div class="app-container">
     
-    <!-- INPUT PANEL -->
-    <div class="panel">
-      <h2>Aetherisa AI Studio</h2>
+    <div class="chat-stream" id="chatStream">
+      <div class="msg-bubble assistant">
+        Hello! I'm your AI prompt helper. Pick suggestions below or type your vision directly into the chat:
+        <div class="chip-container">
+          <button class="chip" onclick="sendChip('Cyberpunk neon cityscape')">Cyberpunk</button>
+          <button class="chip" onclick="sendChip('8k photorealistic portrait')">Photorealistic</button>
+          <button class="chip" onclick="sendChip('Futuristic mecha anime concept')">Mecha Anime</button>
+          <button class="chip" onclick="sendChip('Acrylic paint texture, vivid details')">Acrylic Art</button>
+          <button class="chip" onclick="sendChip('Volumetric cinematic studio lighting')">Cinematic</button>
+        </div>
+      </div>
+    </div>
 
-      <div>
-        <label>Active Generation Prompt</label>
-        <textarea id="prompt" class="main-prompt" rows="4" placeholder="Describe your image in detail..."></textarea>
+    <div class="chat-input-box">
+      <textarea id="chatInput" placeholder="Type a message or detail..."></textarea>
+      <button class="btn-send" onclick="handleChatSend()">Send</button>
+    </div>
+  </div>
+
+  <!-- SLIDING MAIN WRAPPER -->
+  <div class="main-wrapper">
+    <div class="app-container">
+      
+      <!-- INPUT PANEL -->
+      <div class="panel">
+        <h2>Aetherisa AI Studio</h2>
+
+        <div>
+          <label>Active Generation Prompt</label>
+          <textarea id="prompt" class="main-prompt" rows="4" placeholder="Describe your image in full detail..."></textarea>
+        </div>
+
+        <!-- PERFORMANCE MODE -->
+        <div>
+          <label>AI Performance Mode</label>
+          <div class="engine-toggle">
+            <button class="engine-btn active" id="modeFast" onclick="setMode('turbo', this)">⚡ Fast AI</button>
+            <button class="engine-btn" id="modeQuality" onclick="setMode('flux', this)">💎 High Quality</button>
+          </div>
+        </div>
+
+        <!-- ASPECT RATIO PRESETS & DRAW SHAPE MODAL -->
+        <div>
+          <label>Canvas Aspect Ratio & Matrix Shape</label>
+          <div class="ratio-cards">
+            <div class="ratio-card active" onclick="setDimensions(768, 1344, this)">
+              <span>Portrait</span>
+              <span style="opacity:0.6; font-size:0.65rem;">9 : 16</span>
+            </div>
+            <div class="ratio-card" onclick="setDimensions(1344, 768, this)">
+              <span>Landscape</span>
+              <span style="opacity:0.6; font-size:0.65rem;">16 : 9</span>
+            </div>
+            <div class="ratio-card" onclick="setDimensions(1024, 1024, this)">
+              <span>Square</span>
+              <span style="opacity:0.6; font-size:0.65rem;">1 : 1</span>
+            </div>
+            <div class="btn-draw-modal" onclick="openModal()">
+              <span>📐 Draw Shape</span>
+              <span style="opacity:0.8; font-size:0.65rem;">Popup Matrix</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="genBtn" onclick="generateBatch()">Generate 4 Variations</button>
+        <div class="status" id="status">SYS STATUS: READY (FAST AI • PORTRAIT 9:16)</div>
       </div>
 
-      <!-- ASPECT RATIO SELECTION & POP-UP BUTTON -->
-      <div>
-        <label>Image Aspect Ratio & Canvas Shape</label>
-        <div class="ratio-bar">
-          <button class="ratio-btn" onclick="setDimensions(1024, 1024, this)">Square (1:1)</button>
-          <button class="ratio-btn active" onclick="setDimensions(768, 1344, this)">Portrait (9:16)</button>
-          <button class="ratio-btn" onclick="setDimensions(1344, 768, this)">Landscape (16:9)</button>
-          <button class="btn-draw-shape" onclick="openModal()">📐 Custom Shape</button>
+      <!-- SHOWCASE VIEWPORT PANEL -->
+      <div class="panel">
+        <h2>Showcase Viewport</h2>
+        
+        <div class="main-viewport">
+          <div class="loading-spinner" id="spinner"></div>
+          <img id="featuredImg" alt="Featured Output">
+          <div class="placeholder" id="placeholder">Variations will display here</div>
+        </div>
+
+        <label style="margin-top:0.5rem;">Batch Variations (Click to Spin & Swap)</label>
+        <div class="batch-grid" id="batchGrid">
+          <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 1</span></div>
+          <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 2</span></div>
+          <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 3</span></div>
+          <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 4</span></div>
         </div>
       </div>
 
-      <button class="btn-primary" id="genBtn" onclick="generateBatch()">Generate 4 Variations</button>
-      <div class="status" id="status">SYS STATUS: READY (PORTRAIT 9:16)</div>
     </div>
-
-    <!-- SHOWCASE VIEWPORT PANEL -->
-    <div class="panel">
-      <h2>Showcase Viewport</h2>
-      
-      <div class="main-viewport">
-        <div class="loading-spinner" id="spinner"></div>
-        <img id="featuredImg" alt="Featured Output">
-        <div class="placeholder" id="placeholder">Variations will display here</div>
-      </div>
-
-      <label style="margin-top:0.5rem;">Batch Variations (Click to Spin & Swap)</label>
-      <div class="batch-grid" id="batchGrid">
-        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 1</span></div>
-        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 2</span></div>
-        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 3</span></div>
-        <div class="thumb-card"><span style="color:var(--muted); font-size:0.75rem;">VAR 4</span></div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- FUTURISTIC DRAW SHAPE POP-UP MODAL -->
+  <!-- POPUP MODAL FOR DRAWING SHAPE -->
   <div class="modal-overlay" id="shapeModal">
     <div class="modal-card">
-      <h3 style="margin:0; color:#fff; text-transform:uppercase; letter-spacing:1px; font-size:1rem; color:var(--pink-neon);">Custom Canvas Matrix</h3>
+      <h3 style="margin:0; text-transform:uppercase; letter-spacing:1px; font-size:1rem; color:var(--pink-neon);">Custom Canvas Matrix</h3>
       <p style="margin:0; font-size:0.8rem; color:var(--muted);">Click and drag below to set your exact canvas aspect bounds:</p>
       
       <div class="crop-canvas-container" id="cropCanvas">
@@ -493,61 +591,101 @@
       </div>
 
       <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
-        <button class="ratio-btn" onclick="closeModal()">Cancel</button>
-        <button class="btn-draw-shape" onclick="applyCustomShape()">Apply Shape ➔</button>
+        <button class="ratio-card" style="padding:0.5rem 1rem;" onclick="closeModal()">Cancel</button>
+        <button class="btn-draw-modal" style="padding:0.5rem 1rem;" onclick="applyCustomShape()">Apply Shape ➔</button>
       </div>
     </div>
   </div>
 
   <script>
     let customDim = { w: 768, h: 1344 }; // Default Portrait
+    let currentModel = 'turbo'; // Default Fast AI
 
+    /* SLIDE-TO-RIGHT SIDEBAR TOGGLE */
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
+      document.body.classList.toggle('chat-open');
     }
 
-    function appendToChatBox(text) {
-      const chatInput = document.getElementById('chatInput');
-      if (chatInput.value.trim().length > 0) {
-        chatInput.value += `, ${text}`;
+    /* NORMAL CHAT LOGIC WITH REAL-TIME PROMPT SYNC */
+    function sendChip(text) {
+      appendUserMessage(text);
+      syncMainPrompt(text);
+      respondAssistant(`Added "${text}" to your main generator prompt!`);
+    }
+
+    function handleChatSend() {
+      const input = document.getElementById('chatInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      appendUserMessage(val);
+      syncMainPrompt(val);
+      respondAssistant("Updated your prompt in the studio generator!");
+      input.value = '';
+    }
+
+    function syncMainPrompt(newText) {
+      const mainPrompt = document.getElementById('prompt');
+      if (mainPrompt.value.trim().length > 0) {
+        mainPrompt.value += `, ${newText}`;
       } else {
-        chatInput.value = text;
+        mainPrompt.value = newText;
       }
+      navigator.clipboard.writeText(mainPrompt.value).catch(() => {});
     }
 
-    function transferPromptToMain() {
-      const chatText = document.getElementById('chatInput').value.trim();
-      if (!chatText) return alert("Draft box is empty!");
-
-      document.getElementById('prompt').value = chatText;
-
-      const history = document.getElementById('chatHistory');
-      const log = document.createElement('div');
-      log.className = 'chat-msg';
-      log.style.borderLeft = '3px solid #00f0ff';
-      log.innerText = `Transferred prompt to main studio!`;
-      history.appendChild(log);
-      history.scrollTop = history.scrollHeight;
+    function appendUserMessage(msg) {
+      const stream = document.getElementById('chatStream');
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble user';
+      bubble.innerText = msg;
+      stream.appendChild(bubble);
+      stream.scrollTop = stream.scrollHeight;
     }
 
-    /* ASPECT RATIO PRESET SELECTION */
-    function setDimensions(w, h, btn) {
+    function respondAssistant(replyText) {
+      setTimeout(() => {
+        const stream = document.getElementById('chatStream');
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble assistant';
+        bubble.innerText = replyText;
+        stream.appendChild(bubble);
+        stream.scrollTop = stream.scrollHeight;
+      }, 300);
+    }
+
+    /* AI PERFORMANCE MODE SWITCHER */
+    function setMode(mode, btn) {
+      currentModel = mode;
+      document.querySelectorAll('.engine-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateStatus();
+    }
+
+    /* ASPECT RATIO SELECTION */
+    function setDimensions(w, h, element) {
       customDim = { w, h };
-      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      document.getElementById('status').innerText = `SYS STATUS: READY (${w} x ${h})`;
+      document.querySelectorAll('.ratio-card').forEach(c => c.classList.remove('active'));
+      if (element) element.classList.add('active');
+      updateStatus();
     }
 
-    /* MODAL POP-UP LOGIC */
+    function updateStatus() {
+      const modeLabel = currentModel === 'turbo' ? 'FAST AI' : 'HIGH QUALITY';
+      document.getElementById('status').innerText = `SYS STATUS: READY (${modeLabel} • ${customDim.w}x${customDim.h})`;
+    }
+
+    /* POPUP MODAL CONTROL */
     function openModal() { document.getElementById('shapeModal').classList.add('active'); }
     function closeModal() { document.getElementById('shapeModal').classList.remove('active'); }
     function applyCustomShape() {
-      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('status').innerText = `SYS STATUS: CUSTOM DIMENSIONS (${customDim.w} x ${customDim.h})`;
+      document.querySelectorAll('.ratio-card').forEach(c => c.classList.remove('active'));
+      updateStatus();
       closeModal();
     }
 
-    /* DRAG TO DRAW SHAPE IN MODAL */
+    /* DRAG TO DRAW SHAPE LOGIC */
     const cropCanvas = document.getElementById('cropCanvas');
     const cropBox = document.getElementById('cropBox');
     const cropInfo = document.getElementById('cropInfo');
@@ -587,7 +725,7 @@
 
     window.addEventListener('mouseup', () => { isDrawing = false; });
 
-    /* BATCH GENERATION */
+    /* BATCH GENERATION WITH SPIN & SWAP */
     async function generateBatch() {
       const rawPrompt = document.getElementById('prompt').value.trim();
       if (!rawPrompt) return alert("Please enter a prompt!");
@@ -611,7 +749,7 @@
       const urls = [];
       for (let i = 0; i < 4; i++) {
         const seed = Math.floor(Math.random() * 9999999);
-        urls.push(`https://image.pollinations.ai/prompt/${cleanPrompt}?width=${customDim.w}&height=${customDim.h}&seed=${seed}&nologo=true&model=flux`);
+        urls.push(`https://image.pollinations.ai/prompt/${cleanPrompt}?width=${customDim.w}&height=${customDim.h}&seed=${seed}&nologo=true&model=${currentModel}`);
       }
 
       const mainImgLoader = new Image();
