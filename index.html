@@ -3,418 +3,279 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aetherisa Studio Pro - Next-Gen AI Creation Platform</title>
+  <title>Aetherisa AI Studio — Strict Attention Edition</title>
   <style>
     :root {
-      --bg-main: #0a0f1d;
-      --card-bg: rgba(15, 23, 42, 0.75);
-      --card-border: rgba(255, 255, 255, 0.1);
-      --accent-cyan: #38bdf8;
-      --accent-purple: #a855f7;
-      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --radius-lg: 16px;
-      --radius-md: 10px;
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f3f4f6;
+      --border: #1e293b;
     }
-
-    * { box-sizing: border-box; transition: all 0.2s ease; }
-    
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-main);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
-      color: var(--text-main);
-      min-height: 100vh;
+      background-color: var(--bg);
+      color: var(--text);
       margin: 0;
-      padding: 2rem;
+      padding: 1.5rem;
       display: flex;
       justify-content: center;
-      align-items: center;
     }
-
-    /* Glassmorphism Container */
-    .app-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    .app-container {
+      max-width: 1200px;
       width: 100%;
-      max-width: 1080px;
-      padding: 2rem;
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 2rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
     }
-
-    @media (max-width: 850px) {
-      .app-card { grid-template-columns: 1fr; }
+    @media (max-width: 900px) { .app-container { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
-
-    h1.logo {
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin: 0 0 1.5rem 0;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-    }
-
-    /* Form & Controls */
-    label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      display: block;
-      margin-top: 1rem;
-      margin-bottom: 0.4rem;
-    }
-
-    textarea, input[type="text"], select {
+    h2 { margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #fff; }
+    label { font-size: 0.85rem; font-weight: 600; color: #94a3b8; }
+    textarea, select, input {
       width: 100%;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      padding: 12px;
+      background: #0f172a;
+      border: 1px solid var(--border);
       color: #fff;
-      font-size: 0.95rem;
-      resize: vertical;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
     }
-
-    textarea:focus, select:focus, input:focus {
-      outline: none;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    textarea:focus, select:focus, input:focus { outline: 1px solid var(--accent); }
+    .row { display: flex; gap: 0.75rem; }
+    .row > div { flex: 1; }
+    .toggle-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #0f172a;
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
     }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
-
-    /* Buttons */
-    .btn-primary {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent-gradient);
-      color: #fff;
+    .toggle-box input { width: auto; cursor: pointer; }
+    button.btn-primary {
+      background: var(--accent);
+      color: #0b0f19;
+      font-weight: bold;
+      padding: 0.85rem;
       border: none;
-      border-radius: var(--radius-md);
-      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
       font-size: 1rem;
-      cursor: pointer;
-      margin-top: 1.25rem;
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+      transition: background 0.2s;
     }
-
-    .btn-primary:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:disabled {
-      background: #334155;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 12px;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
-
-    /* Dynamic Pipeline Badges */
-    .pipeline-status {
-      font-size: 0.8rem;
-      color: var(--accent-cyan);
-      margin-top: 0.5rem;
-      min-height: 18px;
-    }
-
-    /* Output Viewport */
+    button.btn-primary:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     .viewport {
-      background: rgba(10, 15, 29, 0.8);
-      border: 1px dashed var(--card-border);
-      border-radius: var(--radius-md);
+      background: #070a12;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      min-height: 400px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 380px;
       position: relative;
       overflow: hidden;
     }
-
-    .viewport img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      border-radius: var(--radius-md);
+    .viewport img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+    .viewport .placeholder { color: #64748b; font-size: 0.9rem; text-align: center; padding: 1rem; }
+    .status { font-family: monospace; font-size: 0.85rem; color: var(--accent); }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin-top: 1rem; }
+    .gallery img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); }
+    .gallery img:hover { border-color: var(--accent); }
+    .download-btn {
       display: none;
-    }
-
-    /* Loader Animation */
-    .loader {
-      display: none;
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--accent-cyan);
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* History Grid */
-    .history-bar {
-      grid-column: 1 / -1;
-      border-top: 1px solid var(--card-border);
-      padding-top: 1rem;
-      margin-top: 1rem;
-    }
-
-    .history-grid {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-    }
-
-    .history-thumb {
-      width: 60px;
-      height: 60px;
+      background: #10b981;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      padding: 0.6rem;
       border-radius: 6px;
-      object-fit: cover;
-      cursor: pointer;
-      border: 1px solid var(--card-border);
+      font-weight: bold;
+      font-size: 0.9rem;
     }
-
-    .history-thumb:hover { border-color: var(--accent-cyan); }
   </style>
 </head>
 <body>
 
-  <div class="app-card">
-    
-    <!-- LEFT PANEL: CONTROLS & PIPELINE -->
-    <div>
-      <h1 class="logo">Aetherisa Studio Pro</h1>
+  <div class="app-container">
+    <!-- INPUT CONTROLS -->
+    <div class="panel">
+      <h2>Aetherisa Studio Settings</h2>
 
-      <label for="promptInput">Prompt Engine (Spatial, Physics & Detail Aware)</label>
-      <textarea id="promptInput" rows="3" placeholder="A glass bottle resting on wet pavement at night, reflecting neon city lights with depth of field..."></textarea>
+      <div>
+        <label>Detailed Prompt (Write as much as you want!)</label>
+        <textarea id="prompt" rows="5" placeholder="Describe every detail: background, main subjects, precise colors, weather, lighting..."></textarea>
+      </div>
 
-      <div class="grid-2">
+      <div class="toggle-box" onclick="document.getElementById('strictAttention').click()">
+        <input type="checkbox" id="strictAttention" checked onclick="event.stopPropagation()">
         <div>
-          <label for="presetSelect">Style Preset</label>
-          <select id="presetSelect">
-            <option value="photorealistic">Photorealistic Studio</option>
-            <option value="cinematic">Cinematic Movie 8k</option>
-            <option value="anime">Anime / Cyberpunk</option>
-            <option value="3d-render">Octane 3D Render</option>
-            <option value="raw">RAW / Unfiltered</option>
-          </select>
+          <label style="color:#fff; cursor:pointer;">Strict Prompt Attention (De-Truncator)</label>
+          <div style="font-size:0.75rem; color:#64748b;">Weights sentence blocks so the AI doesn't skip later words.</div>
         </div>
+      </div>
+
+      <div class="row">
         <div>
-          <label for="modelSelect">Engine Backend</label>
+          <label>Model Engine</label>
           <select id="modelSelect">
-            <option value="flux">Flux.1 Pro High-Detail</option>
-            <option value="turbo">Turbo Fast Generation</option>
+            <option value="flux" selected>Flux.1 (Best for Long Detailed Prompts)</option>
+            <option value="turbo">SDXL Turbo (Ultra Fast)</option>
+          </select>
+        </div>
+        <div>
+          <label>Aspect Ratio</label>
+          <select id="aspectSelect" onchange="updateDimensions()">
+            <option value="1024x1024">Square (1:1)</option>
+            <option value="1280x720">Landscape (16:9)</option>
+            <option value="720x1280">Portrait (9:16)</option>
           </select>
         </div>
       </div>
 
-      <div class="grid-3">
+      <div class="row">
         <div>
-          <label for="aspectSelect">Aspect Ratio</label>
-          <select id="aspectSelect">
-            <option value="1024x1024">1:1 Square</option>
-            <option value="1280x720">16:9 Cinema</option>
-            <option value="720x1280">9:16 Mobile</option>
-            <option value="1024x768">4:3 Landscape</option>
-          </select>
+          <label>Width</label>
+          <input type="number" id="width" value="1024" readonly>
         </div>
         <div>
-          <label for="seedInput">Seed (-1 = Random)</label>
-          <input type="text" id="seedInput" value="-1">
-        </div>
-        <div>
-          <label for="qualityEnhance">AI Enhancer</label>
-          <select id="qualityEnhance">
-            <option value="true">Enabled (Auto-LLM)</option>
-            <option value="false">Disabled</option>
-          </select>
+          <label>Height</label>
+          <input type="number" id="height" value="1024" readonly>
         </div>
       </div>
 
-      <label for="negativePrompt">Negative Prompt (Remove elements)</label>
-      <input type="text" id="negativePrompt" placeholder="blurry, bad anatomy, duplicated hands, low quality, distorted faces">
-
-      <button class="btn-primary" id="generateBtn" onclick="runPipeline()">Render High-Res Media</button>
-      <div class="pipeline-status" id="pipelineStatus">Pipeline ready.</div>
-    </div>
-
-    <!-- RIGHT PANEL: VIEWPORT & ACTIONS -->
-    <div style="display: flex; flex-direction: column; justify-content: space-between;">
-      <div class="viewport" id="viewport">
-        <div class="loader" id="loader"></div>
-        <img id="outputImage" alt="AI Generated Render">
-        <p id="placeholderText" style="color: var(--text-muted); font-size: 0.9rem;">Your rendered high-resolution output will appear here.</p>
+      <div>
+        <label>Seed (-1 = Random)</label>
+        <input type="number" id="seed" value="-1">
       </div>
 
-      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-        <button class="btn-secondary" style="flex: 1;" onclick="downloadImage()">Download High-Res</button>
-        <button class="btn-secondary" onclick="copyPrompt()">Copy Prompt</button>
+      <button class="btn-primary" id="genBtn" onclick="generateImage()">Generate Image</button>
+      <div class="status" id="status">Ready. Write your detailed prompt above!</div>
+    </div>
+
+    <!-- DISPLAY VIEWPORT & GALLERY -->
+    <div class="panel">
+      <h2>Output Canvas</h2>
+      <div class="viewport">
+        <img id="resultImg" alt="Generated Output">
+        <div class="placeholder" id="placeholder">Your rendered image will appear here.</div>
       </div>
-    </div>
 
-    <!-- BOTTOM PANEL: RECENT GENERATIONS -->
-    <div class="history-bar">
-      <label>Session Gallery History</label>
-      <div class="history-grid" id="historyGrid"></div>
-    </div>
+      <a id="downloadBtn" class="download-btn" target="_blank" download="aetherisa_image.png">Download HD Image</a>
 
+      <h3>Session History</h3>
+      <div class="gallery" id="gallery"></div>
+    </div>
   </div>
 
   <script>
-    // PRESET PROMPT ENHANCEMENT ENGINE
-    const STYLE_PRESETS = {
-      'photorealistic': 'masterpiece, photorealistic, 8k resolution, physically based rendering, raytracing reflections, realistic skin texture, realistic lighting, global illumination, shallow depth of field, shot on 35mm lens',
-      'cinematic': 'cinematic frame, dramatic anamorphic lighting, sharp focus, octane render style, photorealistic color grading, IMAX quality, high dynamic range',
-      'anime': 'high-end anime key visual, studio ghibli inspired details, crisp line art, vibrant atmospheric lighting, 4k background art',
-      '3d-render': 'octane render, unreal engine 5 render, volumetrics, ray traced reflections, subsurface scattering, 8k digital art',
-      'raw': ''
-    };
-
-    function updateStatus(msg) {
-      document.getElementById('pipelineStatus').innerText = msg;
+    function updateDimensions() {
+      const [w, h] = document.getElementById('aspectSelect').value.split('x');
+      document.getElementById('width').value = w;
+      document.getElementById('height').value = h;
     }
 
-    async function runPipeline() {
-      const userPrompt = document.getElementById('promptInput').value.trim();
-      const preset = document.getElementById('presetSelect').value;
+    // STRICT ATTENTION ENGINE: Breaks down prompt into weighted chunks
+    function processStrictAttention(rawPrompt) {
+      // Clean up whitespace
+      const cleanText = rawPrompt.trim();
+      if (!cleanText) return "";
+
+      // Split into sentences / major clauses
+      const clauses = cleanText.split(/[\.\n;]+/).filter(c => c.trim().length > 0);
+
+      if (clauses.length <= 1) {
+        // Single sentence: add emphasis to key detail phrases
+        return `(${cleanText}:1.2), hyper-detailed, intricate precision, highly focused, all elements rendered`;
+      }
+
+      // Multi-sentence prompt: Weight each clause individually so the end isn't skipped
+      const weightedClauses = clauses.map((clause, index) => {
+        const trimmed = clause.trim();
+        // Give slightly higher weight boost (1.3 to 1.4) to later sentences to prevent truncation
+        const weight = (1.2 + (index * 0.05)).toFixed(2);
+        return `(${trimmed}:${weight})`;
+      });
+
+      return weightedClauses.join(", ") + ", hyper-detailed, complete scene fidelity";
+    }
+
+    async function generateImage() {
+      const rawPrompt = document.getElementById('prompt').value;
+      if (!rawPrompt.trim()) return alert("Please enter a prompt!");
+
+      const useStrict = document.getElementById('strictAttention').checked;
       const model = document.getElementById('modelSelect').value;
-      const aspect = document.getElementById('aspectSelect').value.split('x');
-      const enhance = document.getElementById('qualityEnhance').value;
-      const negPrompt = document.getElementById('negativePrompt').value.trim();
-      let seed = document.getElementById('seedInput').value.trim();
+      const width = document.getElementById('width').value;
+      const height = document.getElementById('height').value;
+      let seed = parseInt(document.getElementById('seed').value);
 
-      if (!userPrompt) {
-        alert("Please enter a prompt description first!");
-        return;
+      const btn = document.getElementById('genBtn');
+      const status = document.getElementById('status');
+      const img = document.getElementById('resultImg');
+      const placeholder = document.getElementById('placeholder');
+      const downloadBtn = document.getElementById('downloadBtn');
+
+      btn.disabled = true;
+      status.innerText = "Applying strict attention rules and sending to model...";
+
+      if (seed === -1) {
+        seed = Math.floor(Math.random() * 100000000);
       }
 
-      const genBtn = document.getElementById('generateBtn');
-      const loader = document.getElementById('loader');
-      const imgTag = document.getElementById('outputImage');
-      const placeholder = document.getElementById('placeholderText');
-
-      genBtn.disabled = true;
-      loader.style.display = 'block';
-      imgTag.style.display = 'none';
-      placeholder.style.display = 'none';
-
-      // 1. Resolve Seed
-      if (seed === "-1" || !seed) {
-        seed = Math.floor(Math.random() * 9999999);
-      }
-
-      // 2. Build Structured Prompt Engineering Pipeline
-      updateStatus("Step 1/3: Enhancing spatial logic & physical rendering prompts...");
-      
-      let finalPrompt = userPrompt;
-      
-      // Append style preset directives
-      if (STYLE_PRESETS[preset]) {
-        finalPrompt += `, ${STYLE_PRESETS[preset]}`;
-      }
-
-      // Append negative constraints if added
-      if (negPrompt) {
-        finalPrompt += ` [avoid: ${negPrompt}]`;
-      }
-
-      // 3. Construct Model Execution Request
-      updateStatus("Step 2/3: Dispatching to Flux.1 high-precision inference server...");
-
-      const width = aspect[0];
-      const height = aspect[1];
+      // Process prompt through Attention Engine if enabled
+      const finalPrompt = useStrict ? processStrictAttention(rawPrompt) : rawPrompt;
       const encodedPrompt = encodeURIComponent(finalPrompt);
 
-      const targetUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=${model}&nologo=true&enhance=${enhance}`;
+      // Route through Pollinations API with Flux model & direct parameters
+      const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=${model}&nologo=true`;
 
-      // 4. Render Engine Stream Handling
-      updateStatus("Step 3/3: Processing global illumination & high-res output...");
+      const tempImg = new Image();
+      tempImg.src = imageUrl;
 
-      imgTag.onload = () => {
-        loader.style.display = 'none';
-        imgTag.style.display = 'block';
-        genBtn.disabled = false;
-        updateStatus(`Render Complete! (Seed: ${seed})`);
-        addToHistory(imgTag.src);
+      tempImg.onload = function() {
+        img.src = imageUrl;
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+        status.innerText = `Done! Model: ${model.toUpperCase()} | Seed: ${seed}`;
+        btn.disabled = false;
+
+        // Setup download link
+        downloadBtn.href = imageUrl;
+        downloadBtn.style.display = 'block';
+
+        // Add to Session Gallery
+        addToGallery(imageUrl);
       };
 
-      imgTag.onerror = () => {
-        loader.style.display = 'none';
-        placeholder.style.display = 'block';
-        placeholder.innerText = 'Render failed. The server might be busy, please try again.';
-        genBtn.disabled = false;
-        updateStatus("Error encountered during rendering.");
+      tempImg.onerror = function() {
+        status.innerText = "Error fetching image. Try simplifying the prompt slightly.";
+        btn.disabled = false;
       };
-
-      imgTag.src = targetUrl;
     }
 
-    // GALLERY HISTORY SYSTEM
-    function addToHistory(url) {
-      const historyGrid = document.getElementById('historyGrid');
+    function addToGallery(url) {
+      const gallery = document.getElementById('gallery');
       const thumb = document.createElement('img');
       thumb.src = url;
-      thumb.className = 'history-thumb';
       thumb.onclick = () => {
-        document.getElementById('outputImage').src = url;
+        document.getElementById('resultImg').src = url;
+        document.getElementById('downloadBtn').href = url;
       };
-      historyGrid.prepend(thumb);
-    }
-
-    // UTILITIES
-    function copyPrompt() {
-      const p = document.getElementById('promptInput').value;
-      navigator.clipboard.writeText(p);
-      alert("Prompt copied to clipboard!");
-    }
-
-    async function downloadImage() {
-      const img = document.getElementById('outputImage');
-      if (!img.src) return;
-
-      try {
-        const res = await fetch(img.src);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `aetherisa-pro-${Date.now()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        window.open(img.src, '_blank');
-      }
+      gallery.prepend(thumb);
     }
   </script>
 </body>
