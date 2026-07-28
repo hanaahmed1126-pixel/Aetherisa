@@ -37,7 +37,7 @@
     
     label { font-size: 0.875rem; font-weight: 600; color: #94a3b8; display: block; margin-top: 1rem; margin-bottom: 0.25rem; }
     
-    input[type="text"], select {
+    input[type="text"], input[type="password"], select {
       width: 100%;
       padding: 12px;
       border: 1px solid #334155;
@@ -46,7 +46,7 @@
       border-radius: 8px;
       font-size: 1rem;
     }
-    input[type="text"]:focus, select:focus { outline: 2px solid #38bdf8; }
+    input:focus, select:focus { outline: 2px solid #38bdf8; }
     
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     
@@ -86,6 +86,12 @@
     }
     img, video { max-width: 100%; height: auto; border-radius: 8px; display: none; }
     .loading { display: none; color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 1rem; }
+
+    .token-box {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #334155;
+    }
   </style>
 </head>
 <body>
@@ -93,15 +99,20 @@
   <div class="card">
     <h2>Aetherisa</h2>
     
+    <div class="token-box">
+      <label for="hfTokenInput">Hugging Face Token (for Video Generation)</label>
+      <input type="password" id="hfTokenInput" placeholder="Paste hf_... token here" onchange="saveToken()">
+    </div>
+
     <label for="promptInput">Prompt Description</label>
     <input type="text" id="promptInput" placeholder="Describe what you want to create..." onkeypress="handleKeyPress(event)">
 
     <div class="grid">
       <div>
         <label for="typeSelect">Output Format</label>
-        <select id="typeSelect" onchange="toggleTypeOptions()">
+        <select id="typeSelect">
           <option value="image">Image / Photo</option>
-          <option value="video">Video Animation</option>
+          <option value="video">Video Animation (Hugging Face)</option>
         </select>
       </div>
       <div>
@@ -126,12 +137,21 @@
   </div>
 
   <script>
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') generateMedia();
+    // Load saved token from browser local storage on startup
+    window.onload = () => {
+      const savedToken = localStorage.getItem('aetherisa_hf_token');
+      if (savedToken) {
+        document.getElementById('hfTokenInput').value = savedToken;
+      }
+    };
+
+    function saveToken() {
+      const token = document.getElementById('hfTokenInput').value.trim();
+      localStorage.setItem('aetherisa_hf_token', token);
     }
 
-    function toggleTypeOptions() {
-      // Custom tweaks if you want to switch settings per media type later
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') generateMedia();
     }
 
     async function generateMedia() {
@@ -142,13 +162,20 @@
       const loadingText = document.getElementById('loadingText');
       const genBtn = document.getElementById('genBtn');
       const downloadBtn = document.getElementById('downloadBtn');
+      const hfToken = document.getElementById('hfTokenInput').value.trim();
 
       if (!prompt) {
         alert("Please enter a prompt first!");
         return;
       }
 
-      // Hide current display items
+      if (type === 'video' && !hfToken) {
+        alert("Please paste your Hugging Face Token in the box at the top to generate videos!");
+        return;
+      }
+
+      saveToken();
+
       imgTag.style.display = 'none';
       vidTag.style.display = 'none';
       downloadBtn.style.display = 'none';
@@ -176,15 +203,26 @@
         imgTag.src = imageUrl;
 
       } else {
-        // Video Generation Mode
-        loadingText.innerText = "Aetherisa is rendering video frames... (This may take 15-30s)";
-        const videoUrl = `https://gen.pollinations.ai/video/${encodedPrompt}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true`;
+        // Video Generation via Hugging Face API
+        loadingText.innerText = "Aetherisa is asking Hugging Face to render your video... (20-40s)";
 
         try {
-          // Fetch video as blob to prevent 0-sec stream errors
-          const response = await fetch(videoUrl);
-          if (!response.ok) throw new Error("Server error");
-          
+          const response = await fetch(
+            "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b",
+            {
+              headers: { 
+                Authorization: `Bearer ${hfToken}`,
+                "Content-Type": "application/json"
+              },
+              method: "POST",
+              body: JSON.stringify({ inputs: prompt }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HF Error: ${response.statusText}`);
+          }
+
           const blob = await response.blob();
           const localVideoUrl = URL.createObjectURL(blob);
 
@@ -193,16 +231,29 @@
           vidTag.style.display = 'block';
           downloadBtn.style.display = 'block';
           genBtn.disabled = false;
+
         } catch (err) {
-          loadingText.innerText = "Video server is busy right now. Try generating again!";
-          genBtn.disabled = false;
+          console.error(err);
+          // Automatic fallback if Hugging Face model is loading or busy
+          loadingText.innerText = "HF Model is starting... generating high-detail animated image instead!";
+          const fallbackImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}%20cinematic%20motion&width=${width}&height=${height}&seed=${randomSeed}&model=flux&nologo=true`;
+
+          imgTag.onload = () => {
+            loadingText.style.display = 'none';
+            imgTag.style.display = 'block';
+            downloadBtn.style.display = 'block';
+            genBtn.disabled = false;
+          };
+          imgTag.src = fallbackImageUrl;
         }
       }
     }
 
     async function downloadMedia() {
       const type = document.getElementById('typeSelect').value;
-      const mediaTag = type === 'image' ? document.getElementById('resultImage') : document.getElementById('resultVideo');
+      const mediaTag = (type === 'image' || document.getElementById('resultImage').style.display === 'block') 
+        ? document.getElementById('resultImage') 
+        : document.getElementById('resultVideo');
       
       if (!mediaTag.src) return;
 
@@ -213,7 +264,7 @@
         
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = `aetherisa-${Date.now()}.${type === 'image' ? 'png' : 'mp4'}`;
+        a.download = `aetherisa-${Date.now()}.${mediaTag.tagName === 'IMG' ? 'png' : 'mp4'}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
